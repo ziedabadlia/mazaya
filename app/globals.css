@@ -1,26 +1,79 @@
-@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap');
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
+@layer base {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    /* Colors */
+    --gold: #C9922A;
+    --gold-light: #E8B84B;
+    --gold-dim: #8A6118;
+    
+    /* Surfaces */
+    --surface-0: #0D0D0D;
+    --surface-1: #161616;
+    --surface-2: #1E1E1E;
+    --surface-3: #272727;
+    --surface-4: #323232;
+    
+    /* Borders */
+    --border-subtle: rgba(201,146,42,0.18);
+    --border-strong: rgba(201,146,42,0.35);
+    
+    /* Text */
+    --text-primary: #F5F0E8;
+    --text-secondary: #A89880;
+    --text-muted: #5A5040;
+    
+    /* Status Colors */
+    --success: #2E9E6B;
+    --success-bg: rgba(46,158,107,0.12);
+    --danger: #D45C3C;
+    --danger-bg: rgba(212,92,60,0.12);
+    --warning: #D4943C;
+    --warning-bg: rgba(212,148,60,0.12);
+    --info: #3C82C4;
+    --info-bg: rgba(60,130,196,0.12);
+    
+    /* Border Radius */
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 14px;
+    --radius-xl: 20px;
+    --radius-full: 9999px;
+
+    /* Shadcn defaults mapped to Mazaya */
+    --background: var(--surface-0);
+    --foreground: var(--text-primary);
+    --border: var(--border-subtle);
+    --input: var(--border-subtle);
+    --ring: var(--gold);
+    --primary: var(--gold);
+    --primary-foreground: var(--surface-0);
+    --secondary: var(--surface-2);
+    --secondary-foreground: var(--text-secondary);
+    --destructive: var(--danger);
+    --destructive-foreground: var(--text-primary);
+    --muted: var(--surface-1);
+    --muted-foreground: var(--text-muted);
+    --accent: var(--surface-3);
+    --accent-foreground: var(--text-primary);
+    --popover: var(--surface-1);
+    --popover-foreground: var(--text-primary);
+    --card: var(--surface-1);
+    --card-foreground: var(--text-primary);
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Cairo', 'Inter', sans-serif;
+    direction: rtl;
+  }
 }
