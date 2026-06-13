@@ -1,45 +1,46 @@
-import NextAuth from "next-auth";
-import { authConfig } from "@/auth/config";
-import { NextResponse } from "next/server";
+import { auth } from "@/auth/index";
+import createIntlMiddleware from "next-intl/middleware";
+import { locales, defaultLocale } from "@/i18n";
 
-const { auth } = NextAuth(authConfig);
+const intlMiddleware = createIntlMiddleware({
+  locales,
+  defaultLocale,
+  localePrefix: "always", 
+});
 
 export default auth((req) => {
-  const { nextUrl } = req;
   const isLoggedIn = !!req.auth;
+  const user = req.auth?.user;
+  const { pathname } = req.nextUrl;
 
-  const isDashboardRoute = nextUrl.pathname.startsWith("/dashboard");
-  const isLoginRoute = nextUrl.pathname === "/login";
+  const isDashboardRoute = pathname.includes("/dashboard");
+  const isWaitingRoomRoute = pathname.includes("/waiting-room");
 
-  // Redirect unauthenticated traffic back to login page
-  if (isDashboardRoute && !isLoggedIn) {
-    return NextResponse.redirect(new URL("/login", nextUrl));
+  // 1. Unauthenticated Security Gateway
+  if (!isLoggedIn && isDashboardRoute) {
+    const loginUrl = new URL("/login", req.nextUrl);
+    return Response.redirect(loginUrl);
   }
 
-  // Redirect logged-in users away from the login screen straight to dashboard
-  if (isLoginRoute && isLoggedIn) {
-    return NextResponse.redirect(new URL("/dashboard", nextUrl));
-  }
-
-  // Handle cross-role dashboard protections
-  if (isLoggedIn && req.auth) {
-    const userRole = req.auth.user.role;
-
-    // Block non-owners from getting into deep owner metrics
-    if (nextUrl.pathname.startsWith("/dashboard/owner") && userRole !== "OWNER") {
-      return NextResponse.redirect(new URL("/dashboard/unauthorized", nextUrl));
-    }
-
-    // Block non-kitchen staff from sneaking into Kitchen Display interfaces
-    if (nextUrl.pathname.startsWith("/dashboard/kitchen") && userRole !== "KITCHEN_STAFF" && userRole !== "OWNER") {
-      return NextResponse.redirect(new URL("/dashboard/unauthorized", nextUrl));
+  // 2. Provisioning & Operational Status Interception
+  // If user is logged in, has a standard operational role, but tenant is pending approval
+  if (isLoggedIn && isDashboardRoute && user?.role !== "SUPER_ADMIN") {
+    // Assuming you attach tenantStatus to the session token in auth options configuration
+    if (user?.tenantStatus === "PENDING") {
+      const waitingRoomUrl = new URL("/waiting-room", req.nextUrl);
+      return Response.redirect(waitingRoomUrl);
     }
   }
 
-  return NextResponse.next();
+  // 3. Prevent users from manually visiting the waiting room if they are already active
+  if (isLoggedIn && isWaitingRoomRoute && user?.tenantStatus === "ACTIVE") {
+    const dashboardUrl = new URL("/dashboard", req.nextUrl);
+    return Response.redirect(dashboardUrl);
+  }
+
+  return intlMiddleware(req);
 });
 
 export const config = {
-  // Execute middleware guards on dashboards and auth loops, bypassing asset chunks
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
+  matcher: ["/((?!api|_next|_vercel|.*\\..*).*)"],
 };

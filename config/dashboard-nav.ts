@@ -1,7 +1,6 @@
 import { UserRole } from "@prisma/client";
 import { type ComponentType, type ComponentProps } from "react";
 import { 
-  type LucideProps,
   LayoutDashboard, 
   Utensils, 
   Store, 
@@ -14,8 +13,7 @@ import {
 export type SharedDashboardIcon = ComponentType<ComponentProps<typeof LayoutDashboard>>;
 
 export interface NavItem {
-  titleEn: string;
-  titleAr: string;
+  translationKey: string; // The key used in messages/ar.json and messages/en.json
   href: string;
   icon: SharedDashboardIcon; 
   roles: UserRole[];
@@ -23,50 +21,43 @@ export interface NavItem {
 
 export const dashboardNavItems: NavItem[] = [
   {
-    titleEn: "Overview",
-    titleAr: "لوحة التحكم",
+    translationKey: "Overview",
     href: "/dashboard",
     icon: LayoutDashboard,
     roles: ["OWNER", "BRANCH_MANAGER"],
   },
   {
-    titleEn: "POS / Checkout",
-    titleAr: "نقطة البيع",
+    translationKey: "POS",
     href: "/dashboard/pos",
     icon: Receipt,
     roles: ["OWNER", "BRANCH_MANAGER", "CASHIER"],
   },
   {
-    titleEn: "Kitchen KDS",
-    titleAr: "شاشة المطبخ",
+    translationKey: "Kitchen",
     href: "/dashboard/kitchen",
     icon: ChefHat,
     roles: ["OWNER", "KITCHEN_STAFF"],
   },
   {
-    titleEn: "Branches",
-    titleAr: "الفروع",
+    translationKey: "Branches",
     href: "/dashboard/branches",
     icon: Store,
     roles: ["OWNER"],
   },
   {
-    titleEn: "Menu Management",
-    titleAr: "إدارة القائمة",
+    translationKey: "Menu",
     href: "/dashboard/menu",
     icon: Utensils,
     roles: ["OWNER", "BRANCH_MANAGER"],
   },
   {
-    titleEn: "Staff Control",
-    titleAr: "إدارة الموظفين",
+    translationKey: "Staff",
     href: "/dashboard/staff",
     icon: Users,
     roles: ["OWNER", "BRANCH_MANAGER"],
   },
   {
-    titleEn: "Settings",
-    titleAr: "الإعدادات",
+    translationKey: "Settings",
     href: "/dashboard/settings",
     icon: Settings,
     roles: ["OWNER"],

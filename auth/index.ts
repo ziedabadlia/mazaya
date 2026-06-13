@@ -16,14 +16,18 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null;
 
-        // Fetch user context from Supabase via Prisma
+        // Fetch user context AND their relation status from Prisma in a single query
         const user = await db.user.findUnique({
           where: { email: credentials.email as string },
+          include: {
+            tenant: {
+              select: { status: true }
+            }
+          }
         });
 
         if (!user || !user.password) return null;
         
-        // Match the text password input with the database hash
         const isPasswordValid = await bcrypt.compare(
           credentials.password as string,
           user.password
@@ -31,7 +35,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         if (!isPasswordValid) return null;
 
-        // Return values to build the secure session cookie
+        // Return values to build the secure session cookie including the status
         return {
           id: user.id,
           name: user.name,
@@ -39,6 +43,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           tenantId: user.tenantId,
           branchId: user.branchId,
           role: user.role,
+          tenantStatus: user.tenant?.status || "PENDING",
         };
       },
     }),

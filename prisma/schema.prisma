@@ -13,6 +13,7 @@ enum UserRole {
   BRANCH_MANAGER
   KITCHEN_STAFF
   CASHIER
+  SUPER_ADMIN
 }
 
 enum OrderStatus {
@@ -28,14 +29,21 @@ enum TableStatus {
   EMPTY
 }
 
+enum TenantStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+}
+
 // ── CORE MODELS ──
 
 model Tenant {
   id         String   @id @default(cuid())
   name       String
+  status    TenantStatus @default(PENDING)
   slug       String   @unique
   logo       String?
-  currency   String   @default("AED") // e.g., د.إ or ر.س
+  currency   String   @default("AED")
   createdAt  DateTime @default(now()) @map("created_at")
   updatedAt  DateTime @updatedAt @map("updated_at")
 
