@@ -26,7 +26,7 @@ export function DashboardSidebar({ items, user }: SidebarProps) {
     <>
       {/* Mobile Header & Trigger */}
       <div className="flex items-center justify-between border-b border-gray-200 bg-white p-4 md:hidden">
-        <span className="text-2xl font-bold text-orange-600">جودة</span>
+        <span className="text-2xl font-bold text-orange-600">مزايا</span>
         <button onClick={() => setIsOpen(!isOpen)} className="text-gray-600">
           {isOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
@@ -42,7 +42,7 @@ export function DashboardSidebar({ items, user }: SidebarProps) {
         {/* Desktop Brand Logo */}
         <div className="hidden items-center justify-center border-b border-gray-100 py-6 md:flex">
           <span className="text-3xl font-extrabold text-orange-600 tracking-tight">
-            جودة
+            مزايا
           </span>
         </div>
 
