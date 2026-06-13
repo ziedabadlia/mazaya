@@ -1,0 +1,16 @@
+{
+  "Auth": {
+    "login": "Login",
+    "register": "Create Account",
+    "email": "Email Address",
+    "password": "Password",
+    "submit": "Continue",
+    "2fa_title": "Email Verification",
+    "2fa_desc": "We have sent a 6-digit code to your email."
+  },
+  "Dashboard": {
+    "welcome": "Welcome back, {name}",
+    "overview_owner": "Here is an overview of your restaurants' performance today.",
+    "overview_branch": "Here is an overview of your branch's performance today."
+  }
+}
