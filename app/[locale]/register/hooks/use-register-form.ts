@@ -12,10 +12,13 @@ export function useRegisterForm(locale: string) {
   const [step, setStep] = useState<RegisterStep>("INFO");
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  
+  // Safely hold form properties locally across multi-step rendering phases
+  const [savedFormData, setSavedFormData] = useState<Record<string, string>>({});
   const [userEmail, setUserEmail] = useState<string>("");
 
   /**
-   * Phase 1: Submits info to server action, updates verification tokens, sends Gmail SMTP message.
+   * Phase 1: Validates information data formats, updates token state registries, and emits email alerts.
    */
   const handleInitiate = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -23,8 +26,13 @@ export function useRegisterForm(locale: string) {
     setSuccessMessage(null);
 
     const formData = new FormData(event.currentTarget);
-    const emailValue = formData.get("email") as string;
-    setUserEmail(emailValue);
+    const formFields: Record<string, string> = {};
+    formData.forEach((value, key) => {
+      formFields[key] = value.toString();
+    });
+
+    setUserEmail(formFields.email || "");
+    setSavedFormData(formFields);
 
     startTransition(async () => {
       try {
@@ -40,26 +48,22 @@ export function useRegisterForm(locale: string) {
           setStep("OTP");
         }
       } catch (err) {
-        setError("An unexpected system error occurred. Please try again.");
+        const errorMessage = err instanceof Error ? err.message : "An unexpected system error occurred. Please try again.";
+        setError(errorMessage);
       }
     });
   };
 
   /**
-   * Phase 2: Verifies 6-digit pin code and completes account configuration.
+   * Phase 2: Matches verification token credentials and builds system account nodes.
    */
   const handleVerify = async (otpCode: string) => {
-    if (otpCode.length !== 6) {
-      setError("Please enter a valid 6-digit confirmation code.");
-      return;
-    }
-
     setError(null);
     setSuccessMessage(null);
 
     startTransition(async () => {
       try {
-        const result = await confirmRegistration(userEmail, otpCode);
+        const result = await confirmRegistration(userEmail, otpCode, savedFormData);
 
         if (!result.success) {
           setError(result.message);
@@ -73,7 +77,8 @@ export function useRegisterForm(locale: string) {
           router.push(`/${locale}/waiting-room`);
         }, 1500);
       } catch (err) {
-        setError("Verification matching run failed.");
+        const errorMessage = err instanceof Error ? err.message : "Verification token matching run failed.";
+        setError(errorMessage);
       }
     });
   };

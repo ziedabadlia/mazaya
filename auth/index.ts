@@ -1,11 +1,11 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
-import { db } from "@/lib/db";
 import { authConfig } from "./config";
-import bcrypt from "bcrypt";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
+  // Provide a fallback secret for development so the auth library initializes
+  secret: process.env.NEXTAUTH_SECRET ?? process.env.AUTH_SECRET ?? "dev-secret",
   providers: [
     Credentials({
       name: "Credentials",
@@ -16,7 +16,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null;
 
-        // Fetch user context AND their relation status from Prisma in a single query
+        const { db } = await import("@/lib/db");
+        const bcryptModule = await import("bcrypt");
+        const bcrypt = bcryptModule.default ?? bcryptModule;
+
         const user = await db.user.findUnique({
           where: { email: credentials.email as string },
           include: {

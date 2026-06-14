@@ -9,22 +9,21 @@ const notoKufi = Noto_Kufi_Arabic({ subsets: ["arabic"], variable: "--font-noto-
 
 export default async function RootLayout({
   children,
-  params: { locale },
+  params,
 }: {
   children: React.ReactNode;
-  params: { locale: string };
+  params: Promise<{ locale: string }>;
 }) {
-  // Fetch the dictionary for the current language
+  const { locale } = await params;
+
   const messages = await getMessages();
 
-  // Dynamically set RTL/LTR direction
   const direction = locale === "ar" ? "rtl" : "ltr";
   const fontClass = locale === "ar" ? notoKufi.variable : inter.variable;
 
   return (
     <html lang={locale} dir={direction}>
       <body className={`${fontClass} font-sans bg-gray-50 text-gray-900 antialiased`}>
-        {/* Wrap the app with the dictionary so Client Components can access translations */}
         <NextIntlClientProvider messages={messages}>
           {children}
         </NextIntlClientProvider>
