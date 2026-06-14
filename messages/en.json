@@ -1,0 +1,39 @@
+{
+  "Auth": {
+    "login": "Login",
+    "register": "Create Account",
+    "register_title": "Create Restaurant Account",
+    "verify_title": "Two-Factor Verification",
+    "owner_name_label": "Full Name",
+    "owner_name_placeholder": "John Doe",
+    "restaurant_name_label": "Restaurant Name",
+    "restaurant_name_placeholder": "Mazaya Bistro",
+    "email": "Email Address",
+    "email_label": "Email Address",
+    "email_placeholder": "name@example.com",
+    "password": "Password",
+    "password_label": "Password",
+    "continue_button": "Continue Registration",
+    "submit": "Continue",
+    "2fa_title": "Email Verification",
+    "2fa_desc": "We have sent a 6-digit code to your email.",
+    "waiting_room_title": "Your Account is Under Review",
+    "waiting_room_desc": "Thank you for registering with Jawda. Our team is currently reviewing your restaurant profile to secure your account and provision resources. We will send you an email as soon as your account is activated.",
+    "waiting_room_support": "If you have any questions, please contact our support team."
+  },
+  "Dashboard": {
+    "welcome": "Welcome back, {name}",
+    "overview_owner": "Here is an overview of your restaurants' performance today.",
+    "overview_branch": "Here is an overview of your branch's performance today."
+  },
+  "Nav": {
+    "Overview": "Overview",
+    "POS": "POS / Checkout",
+    "Kitchen": "Kitchen KDS",
+    "Branches": "Branches",
+    "Menu": "Menu Management",
+    "Staff": "Staff Control",
+    "Settings": "Settings",
+    "Logout": "Logout"
+  }
+}

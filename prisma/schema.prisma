@@ -13,6 +13,7 @@ enum UserRole {
   BRANCH_MANAGER
   KITCHEN_STAFF
   CASHIER
+  SUPER_ADMIN
 }
 
 enum OrderStatus {
@@ -28,14 +29,21 @@ enum TableStatus {
   EMPTY
 }
 
+enum TenantStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+}
+
 // ── CORE MODELS ──
 
 model Tenant {
   id         String   @id @default(cuid())
   name       String
+  status    TenantStatus @default(PENDING)
   slug       String   @unique
   logo       String?
-  currency   String   @default("AED") // e.g., د.إ or ر.س
+  currency   String   @default("AED")
   createdAt  DateTime @default(now()) @map("created_at")
   updatedAt  DateTime @updatedAt @map("updated_at")
 
@@ -51,17 +59,17 @@ model Tenant {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  tenantId  String   @map("tenant_id")
-  branchId  String?  @map("branch_id")
-  name      String
-  email     String   @unique
-  password  String // For NextAuth credential provider
-  role      UserRole
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  id            String    @id @default(cuid())
+  tenantId      String    @map("tenant_id")
+  branchId      String?   @map("branch_id")
+  name          String
+  email         String    @unique
+  emailVerified DateTime? @map("email_verified")
+  password      String 
+  role          UserRole
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
 
-  // Relationships
   tenant Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   branch Branch? @relation(fields: [branchId], references: [id], onDelete: SetNull)
 
@@ -200,4 +208,15 @@ model StaffInvitation {
 
   @@index([tenantId])
   @@map("staff_invitations")
+}
+
+model VerificationToken {
+  id        String   @id @default(cuid())
+  email     String
+  token     String   @unique // This will be the 6-digit code or secure hash
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@unique([email, token]) // Ensures one specific token per email
+  @@map("verification_tokens")
 }

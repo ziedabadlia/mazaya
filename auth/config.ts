@@ -1,5 +1,5 @@
 import type { NextAuthConfig } from "next-auth";
-import { UserRole } from "@prisma/client";
+import type { TenantStatus, UserRole } from "@prisma/client";
 
 export const authConfig = {
   pages: {
@@ -15,15 +15,17 @@ export const authConfig = {
         token.tenantId = user.tenantId;
         token.branchId = user.branchId;
         token.role = user.role as UserRole;
+        token.tenantStatus = user.tenantStatus as TenantStatus
       }
       return token;
     },
     async session({ session, token }) {
-      if (token) {
-        session.user.id = token.id;
-        session.user.tenantId = token.tenantId;
-        session.user.branchId = token.branchId;
-        session.user.role = token.role;
+      if (token && session.user) {
+        session.user.id = token.id as string;
+        session.user.tenantId = token.tenantId as string;
+        session.user.branchId = token.branchId as string | null;
+        session.user.role = token.role as UserRole;
+        session.user.tenantStatus = token.tenantStatus as TenantStatus
       }
       return session;
     },

@@ -1,11 +1,11 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
-import { db } from "@/lib/db";
 import { authConfig } from "./config";
-import bcrypt from "bcrypt";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
+  // Provide a fallback secret for development so the auth library initializes
+  secret: process.env.NEXTAUTH_SECRET ?? process.env.AUTH_SECRET ?? "dev-secret",
   providers: [
     Credentials({
       name: "Credentials",
@@ -16,14 +16,21 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null;
 
-        // Fetch user context from Supabase via Prisma
+        const { db } = await import("@/lib/db");
+        const bcryptModule = await import("bcrypt");
+        const bcrypt = bcryptModule.default ?? bcryptModule;
+
         const user = await db.user.findUnique({
           where: { email: credentials.email as string },
+          include: {
+            tenant: {
+              select: { status: true }
+            }
+          }
         });
 
         if (!user || !user.password) return null;
         
-        // Match the text password input with the database hash
         const isPasswordValid = await bcrypt.compare(
           credentials.password as string,
           user.password
@@ -31,7 +38,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         if (!isPasswordValid) return null;
 
-        // Return values to build the secure session cookie
+        // Return values to build the secure session cookie including the status
         return {
           id: user.id,
           name: user.name,
@@ -39,6 +46,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           tenantId: user.tenantId,
           branchId: user.branchId,
           role: user.role,
+          tenantStatus: user.tenant?.status || "PENDING",
         };
       },
     }),

@@ -1,0 +1,39 @@
+{
+  "Auth": {
+    "login": "تسجيل الدخول",
+    "register": "إنشاء حساب",
+    "register_title": "إنشاء حساب مطعم",
+    "verify_title": "التحقق بخطوتين",
+    "owner_name_label": "الاسم الكامل",
+    "owner_name_placeholder": "محمد أحمد",
+    "restaurant_name_label": "اسم المطعم",
+    "restaurant_name_placeholder": "مطعم مزايا",
+    "email": "البريد الإلكتروني",
+    "email_label": "البريد الإلكتروني",
+    "email_placeholder": "name@example.com",
+    "password": "كلمة المرور",
+    "password_label": "كلمة المرور",
+    "continue_button": "متابعة التسجيل",
+    "submit": "متابعة",
+    "2fa_title": "التحقق من البريد",
+    "2fa_desc": "لقد أرسلنا رمزاً مكوناً من 6 أرقام إلى بريدك الإلكتروني.",
+    "waiting_room_title": "حسابك قيد المراجعة",
+    "waiting_room_desc": "شكراً لتسجيلك في منصة جودة. يقوم فريقنا حالياً بمراجعة معلومات مطعمك لتأمين الحساب وتفعيل الميزات. سنرسل لك بريداً إلكترونياً فور تفعيل الحساب.",
+    "waiting_room_support": "إذا كان لديك أي استفسار، يرجى التواصل مع الدعم الفني."
+  },
+  "Dashboard": {
+    "welcome": "مرحباً بك، {name}",
+    "overview_owner": "إليك نظرة عامة على أداء مطاعمك اليوم.",
+    "overview_branch": "إليك نظرة عامة على أداء الفرع اليوم."
+  },
+  "Nav": {
+    "Overview": "لوحة التحكم",
+    "POS": "نقطة البيع",
+    "Kitchen": "شاشة المطبخ",
+    "Branches": "الفروع",
+    "Menu": "إدارة القائمة",
+    "Staff": "إدارة الموظفين",
+    "Settings": "الإعدادات",
+    "Logout": "تسجيل الخروج"
+  }
+}
