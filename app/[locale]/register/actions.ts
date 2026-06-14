@@ -37,7 +37,7 @@ export async function initiateRegistration(formData: FormData) {
     // Check if the user email is already taken in the database
     const existingUser = await db.user.findUnique({ where: { email } });
     if (existingUser) {
-      return { success: false, message: "This email address is already registered." };
+      return { success: false, message: "errors.email_taken" };
     }
 
     // Generate secure 6-digit confirmation token pin
@@ -76,8 +76,7 @@ export async function initiateRegistration(formData: FormData) {
       `,
     });
 
-    return { success: true, step: "OTP", message: "Verification code sent to your email." };
-  } catch (error) {
+    return { success: true, step: "OTP", message: "success.code_sent" };  } catch (error) {
     console.error("Registration Initiation Failure:", error);
     const errorMessage = error instanceof Error ? error.message : "System failure during email transmission.";
     return { success: false, message: errorMessage };
@@ -93,13 +92,13 @@ export async function confirmRegistration(email: string, code: string, rawFormDa
     const tokenRecord = await db.verificationToken.findUnique({ where: { token: code } });
 
     if (!tokenRecord || tokenRecord.email !== email || new Date() > tokenRecord.expiresAt) {
-      return { success: false, message: "Invalid or expired verification code." };
+      return { success: false, message: "errors.otp_invalid" };
     }
 
     // 2. Reparse form data to ensure absolute data validity prior to database commit
     const validationResult = registrationInfoSchema.safeParse(rawFormData);
     if (!validationResult.success) {
-      return { success: false, message: "Invalid registration state data payload." };
+      return { success: false, message: "errors.invalid_state" };
     }
 
     const { name, restaurantName, password } = validationResult.data;
@@ -137,7 +136,7 @@ export async function confirmRegistration(email: string, code: string, rawFormDa
       await tx.verificationToken.delete({ where: { token: code } });
     });
 
-    return { success: true, message: "Account setup complete!" };
+    return { success: true, message: "success.account_created" };
   } catch (error) {
     console.error("Registration Finalization Failure:", error);
     const errorMessage = error instanceof Error ? error.message : "Database transaction commitment failed.";

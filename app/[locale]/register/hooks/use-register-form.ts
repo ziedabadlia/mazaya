@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { initiateRegistration, confirmRegistration } from "../actions";
+import { useTranslations } from "next-intl";
 
 export type RegisterStep = "INFO" | "OTP";
 
@@ -12,6 +13,8 @@ export function useRegisterForm(locale: string) {
   const [step, setStep] = useState<RegisterStep>("INFO");
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const t = useTranslations("Auth");
+
   
   // Safely hold form properties locally across multi-step rendering phases
   const [savedFormData, setSavedFormData] = useState<Record<string, string>>({});
@@ -20,68 +23,58 @@ export function useRegisterForm(locale: string) {
   /**
    * Phase 1: Validates information data formats, updates token state registries, and emits email alerts.
    */
-  const handleInitiate = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setError(null);
-    setSuccessMessage(null);
+const handleInitiate = async (data: Record<string, string>) => {
+  setError(null);
+  setSuccessMessage(null);
+  setUserEmail(data.email || "");
+  setSavedFormData(data);
 
-    const formData = new FormData(event.currentTarget);
-    const formFields: Record<string, string> = {};
-    formData.forEach((value, key) => {
-      formFields[key] = value.toString();
-    });
+  const formData = new FormData();
+  Object.entries(data).forEach(([key, value]) => formData.append(key, value));
 
-    setUserEmail(formFields.email || "");
-    setSavedFormData(formFields);
+  startTransition(async () => {
+    try {
+      const result = await initiateRegistration(formData);
 
-    startTransition(async () => {
-      try {
-        const result = await initiateRegistration(formData);
-
-        if (!result.success) {
-          setError(result.message);
-          return;
-        }
-
-        setSuccessMessage(result.message);
-        if (result.step === "OTP") {
-          setStep("OTP");
-        }
-      } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : "An unexpected system error occurred. Please try again.";
-        setError(errorMessage);
+      if (!result.success) {
+        setError(t(result.message as any)); // <-- t() here
+        return;
       }
-    });
-  };
+
+      setSuccessMessage(t(result.message as any)); // <-- t() here
+      if (result.step === "OTP") setStep("OTP");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "An unexpected error occurred.");
+    }
+  });
+};
 
   /**
    * Phase 2: Matches verification token credentials and builds system account nodes.
    */
   const handleVerify = async (otpCode: string) => {
-    setError(null);
-    setSuccessMessage(null);
+  setError(null);
+  setSuccessMessage(null);
 
-    startTransition(async () => {
-      try {
-        const result = await confirmRegistration(userEmail, otpCode, savedFormData);
+  startTransition(async () => {
+    try {
+      const result = await confirmRegistration(userEmail, otpCode, savedFormData);
 
-        if (!result.success) {
-          setError(result.message);
-          return;
-        }
-
-        setSuccessMessage(result.message);
-        
-        setTimeout(() => {
-          router.refresh();
-          router.push(`/${locale}/waiting-room`);
-        }, 1500);
-      } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : "Verification token matching run failed.";
-        setError(errorMessage);
+      if (!result.success) {
+        setError(t(result.message as any)); // <-- t() here
+        return;
       }
-    });
-  };
+
+      setSuccessMessage(t(result.message as any)); // <-- t() here
+      setTimeout(() => {
+        router.refresh();
+        router.push(`/${locale}/waiting-room`);
+      }, 1500);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Verification failed.");
+    }
+  });
+};
 
   const setStepBack = () => {
     setError(null);

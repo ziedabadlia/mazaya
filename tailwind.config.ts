@@ -19,8 +19,8 @@ const config = {
     },
     extend: {
       fontFamily: {
-        sans: ['Cairo', 'Inter', 'sans-serif'],
-        cairo: ['Cairo', 'sans-serif'],
+        sans: ['IBM Plex Sans Arabic', 'Inter', 'sans-serif'],
+        arabic: ['IBM Plex Sans Arabic', 'sans-serif'],
         inter: ['Inter', 'sans-serif'],
       },
       colors: {

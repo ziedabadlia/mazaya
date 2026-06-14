@@ -1,80 +1,87 @@
-@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap');
+@import 'tailwindcss';
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@theme {
+  /* Fonts */
+  --font-sans: 'IBM Plex Sans Arabic', 'Inter', sans-serif;
+  --font-arabic: 'IBM Plex Sans Arabic', sans-serif;
+  --font-inter: 'Inter', sans-serif;
 
-@layer base {
-  :root {
-    /* Colors */
-    --gold: #C9922A;
-    --gold-light: #E8B84B;
-    --gold-dim: #8A6118;
-    
-    /* Surfaces */
-    --surface-0: #0D0D0D;
-    --surface-1: #161616;
-    --surface-2: #1E1E1E;
-    --surface-3: #272727;
-    --surface-4: #323232;
-    
-    /* Borders */
-    --border-subtle: rgba(201,146,42,0.18);
-    --border-strong: rgba(201,146,42,0.35);
-    
-    /* Text */
-    --text-primary: #F5F0E8;
-    --text-secondary: #A89880;
-    --text-muted: #5A5040;
-    
-    /* Status Colors */
-    --success: #2E9E6B;
-    --success-bg: rgba(46,158,107,0.12);
-    --danger: #D45C3C;
-    --danger-bg: rgba(212,92,60,0.12);
-    --warning: #D4943C;
-    --warning-bg: rgba(212,148,60,0.12);
-    --info: #3C82C4;
-    --info-bg: rgba(60,130,196,0.12);
-    
-    /* Border Radius */
-    --radius-sm: 6px;
-    --radius-md: 10px;
-    --radius-lg: 14px;
-    --radius-xl: 20px;
-    --radius-full: 9999px;
+  /* Gold */
+  --color-gold: #C9922A;
+  --color-gold-light: #E8B84B;
+  --color-gold-dim: #8A6118;
 
-    /* Shadcn defaults mapped to Mazaya */
-    --background: var(--surface-0);
-    --foreground: var(--text-primary);
-    --border: var(--border-subtle);
-    --input: var(--border-subtle);
-    --ring: var(--gold);
-    --primary: var(--gold);
-    --primary-foreground: var(--surface-0);
-    --secondary: var(--surface-2);
-    --secondary-foreground: var(--text-secondary);
-    --destructive: var(--danger);
-    --destructive-foreground: var(--text-primary);
-    --muted: var(--surface-1);
-    --muted-foreground: var(--text-muted);
-    --accent: var(--surface-3);
-    --accent-foreground: var(--text-primary);
-    --popover: var(--surface-1);
-    --popover-foreground: var(--text-primary);
-    --card: var(--surface-1);
-    --card-foreground: var(--text-primary);
-  }
+  /* Surfaces */
+  --color-surface-0: #0D0D0D;
+  --color-surface-1: #161616;
+  --color-surface-2: #1E1E1E;
+  --color-surface-3: #272727;
+  --color-surface-4: #323232;
+
+  /* Text */
+  --color-txt-primary: #F5F0E8;
+  --color-txt-secondary: #A89880;
+  --color-txt-muted: #5A5040;
+
+  /* Status */
+  --color-status-success: #2E9E6B;
+  --color-status-success-bg: rgba(46,158,107,0.12);
+  --color-status-danger: #D45C3C;
+  --color-status-danger-bg: rgba(212,92,60,0.12);
+  --color-status-warning: #D4943C;
+  --color-status-warning-bg: rgba(212,148,60,0.12);
+  --color-status-info: #3C82C4;
+  --color-status-info-bg: rgba(60,130,196,0.12);
+
+  /* Border */
+  --color-border: rgba(201,146,42,0.18);
+  --color-border-subtle: rgba(201,146,42,0.18);
+  --color-border-strong: rgba(201,146,42,0.35);
+
+  /* Shadcn-mapped */
+  --color-background: #0D0D0D;
+  --color-foreground: #F5F0E8;
+  --color-input: rgba(201,146,42,0.18);
+  --color-ring: #C9922A;
+  --color-primary: #C9922A;
+  --color-primary-foreground: #0D0D0D;
+  --color-secondary: #1E1E1E;
+  --color-secondary-foreground: #A89880;
+  --color-destructive: #D45C3C;
+  --color-destructive-foreground: #F5F0E8;
+  --color-muted: #161616;
+  --color-muted-foreground: #5A5040;
+  --color-accent: #272727;
+  --color-accent-foreground: #F5F0E8;
+  --color-popover: #161616;
+  --color-popover-foreground: #F5F0E8;
+  --color-card: #161616;
+  --color-card-foreground: #F5F0E8;
+
+  /* Border radius */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+  --radius-full: 9999px;
+
+  /* Animation */
+  --animate-fadeIn: fadeIn 0.4s ease both;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 @layer base {
   * {
-    border-color: var(--border);
+    border-color: var(--color-border);
   }
   body {
-    background-color: var(--background);
-    color: var(--foreground);
-    font-family: 'Cairo', 'Inter', sans-serif;
-    direction: rtl;
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
   }
 }
