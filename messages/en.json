@@ -18,24 +18,35 @@
     "2fa_title": "Email Verification",
     "2fa_desc": "We have sent a 6-digit code to your email.",
     "waiting_room_title": "Your Account is Under Review",
-    "waiting_room_desc": "Thank you for registering with Jawda. Our team is currently reviewing your restaurant profile to secure your account and provision resources. We will send you an email as soon as your account is activated.",
+    "waiting_room_desc": "Thank you for registering with Mazaya. Our team is currently reviewing your restaurant profile to secure your account and provision resources. We will send you an email as soon as your account is activated.",
     "waiting_room_support": "If you have any questions, please contact our support team.",
     "otp_sent_notice": "We sent a security verification code to:",
     "otp_label": "Verification Code",
     "verify_button": "Confirm Code & Finish",
     "back_button": "Back",
     "password_hint": "Must be at least 8 characters",
+    "login_title": "Welcome Back",
+    "login_button": "Sign In",
+    "no_account": "Don't have an account?",
+    "have_account": "Already have an account?",
+    "waiting_room_user_label": "Signed in as",
+    "logout_button": "Sign Out",
+    "status_pending": "Pending",
+    "status_suspended": "Suspended",
     "success": {
-    "code_sent": "Verification code sent to your email.",
-    "account_created": "Account setup complete!"
-  },
+      "code_sent": "Verification code sent to your email.",
+      "account_created": "Account setup complete!"
+    },
     "errors": {
       "name_min": "Name must be at least 2 characters.",
       "restaurant_name_min": "Restaurant name must be at least 2 characters.",
       "email_invalid": "Please enter a valid email address.",
       "password_min": "Password must be at least 8 characters long.",
       "otp_length": "Code must be exactly 6 digits.",
-      "otp_digits_only": "Code must contain digits only."
+      "otp_digits_only": "Code must contain digits only.",
+      "invalid_credentials": "Invalid email or password.",
+      "unexpected": "An unexpected error occurred. Please try again.",
+      "password_required": "Password is required."
     }
   },
   "Dashboard": {

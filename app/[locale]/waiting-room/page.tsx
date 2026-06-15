@@ -1,71 +1,99 @@
-import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
 import { Clock } from "lucide-react";
 import { auth, signOut } from "@/auth/index";
 import { redirect } from "next/navigation";
+import { AnimatedMeshBackground } from "@/components/ui/animated-mesh-background";
 
 export default async function WaitingRoomPage() {
   const session = await auth();
-  const t = useTranslations("Auth");
+  const t = await getTranslations("Auth");
 
-  // If they somehow bypass the middleware but are active, send them back to the dashboard
   if (session?.user?.tenantStatus === "ACTIVE") {
     redirect("/dashboard");
   }
 
-  // Server action handler to allow them to securely log out from the waiting screen
+  const statusLabel =
+    session?.user?.tenantStatus === "PENDING"
+      ? t("status_pending")
+      : session?.user?.tenantStatus === "SUSPENDED"
+        ? t("status_suspended")
+        : session?.user?.tenantStatus;
+
   async function handleLogout() {
     "use server";
     await signOut({ redirectTo: "/login" });
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50 px-4 py-12 sm:px-6 lg:px-8">
-      <div className="w-full max-w-md space-y-8 rounded-2xl bg-white p-8 shadow-sm border border-gray-100 text-center">
-        
-        {/* Animated Icon Container */}
-        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-orange-50 text-orange-600">
-          <Clock className="h-8 w-8 animate-pulse" />
-        </div>
+    <div className='relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-12 sm:px-6 lg:px-8'>
+      <AnimatedMeshBackground />
 
-        {/* Content Section */}
-        <div className="space-y-3">
-          <h1 className="text-2xl font-bold tracking-tight text-gray-900">
-            {t("waiting_room_title")}
-          </h1>
-          <p className="text-sm text-gray-600 leading-relaxed">
-            {t("waiting_room_desc")}
-          </p>
-          <p className="text-xs text-gray-400 font-medium pt-2">
-            {t("waiting_room_support")}
-          </p>
-        </div>
+      <div className='relative z-10 w-full max-w-md'>
+        {/* Top accent glow bar */}
+        <div className='absolute -top-px start-6 end-6 h-px bg-gradient-to-r from-transparent via-gold/60 to-transparent' />
 
-        {/* Separation Rule */}
-        <hr className="border-gray-100" />
-
-        {/* Dynamic User Profile Detail */}
-        {session?.user && (
-          <div className="rounded-lg bg-gray-50 p-3 text-start flex items-center justify-between">
-            <div className="truncate pr-2">
-              <p className="text-xs text-gray-400">المستخدم / User</p>
-              <p className="text-sm font-medium text-gray-700 truncate">{session.user.email}</p>
+        <div className='space-y-7 rounded-xl border border-border bg-gradient-to-b from-surface-1 to-surface-1/60 p-8 shadow-2xl shadow-black/50 backdrop-blur-sm sm:p-9'>
+          {/* Logo */}
+          <div className='flex flex-col items-center space-y-5 text-center'>
+            <div className='flex h-24 w-24 items-center justify-center'>
+              <img
+                src='/mazaya-logo.png'
+                alt='Mazaya'
+                className='h-full w-full object-contain drop-shadow-lg'
+              />
             </div>
-            <span className="inline-flex items-center rounded-full bg-amber-50 px-2 py-1 text-xs font-medium text-amber-800 border border-amber-200">
-              {session.user.tenantStatus}
-            </span>
+
+            {/* Animated clock badge */}
+            <div className='flex h-14 w-14 items-center justify-center rounded-full bg-gold/10 ring-1 ring-gold/20'>
+              <Clock className='h-7 w-7 animate-pulse text-gold' />
+            </div>
+
+            <div className='space-y-2'>
+              <h1 className='text-2xl font-bold tracking-tight text-txt-primary'>
+                {t("waiting_room_title")}
+              </h1>
+              <p className='text-sm leading-relaxed text-txt-secondary'>
+                {t("waiting_room_desc")}
+              </p>
+              <p className='pt-1 text-xs font-medium text-txt-muted'>
+                {t("waiting_room_support")}
+              </p>
+            </div>
           </div>
-        )}
 
-        {/* Action Button */}
-        <form action={handleLogout}>
-          <button
-            type="submit"
-            className="w-full rounded-xl bg-gray-900 px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2"
-          >
-            تسجيل الخروج / Sign Out
-          </button>
-        </form>
+          {/* Divider */}
+          <div className='h-px bg-border' />
 
+          {/* User info */}
+          {session?.user && (
+            <div className='flex items-center justify-between rounded-lg border border-border bg-surface-2/60 px-4 py-3'>
+              <div className='truncate pe-3'>
+                <p className='text-xs text-txt-muted'>
+                  {t("waiting_room_user_label")}
+                </p>
+                <p
+                  className='truncate text-sm font-medium text-txt-primary'
+                  dir='ltr'
+                >
+                  {session.user.email}
+                </p>
+              </div>
+              <span className='inline-flex shrink-0 items-center rounded-full border border-gold/20 bg-gold/10 px-2.5 py-1 text-xs font-semibold text-gold'>
+                {statusLabel}
+              </span>
+            </div>
+          )}
+
+          {/* Logout */}
+          <form action={handleLogout}>
+            <button
+              type='submit'
+              className='flex w-full items-center justify-center gap-2 rounded-md border border-border bg-surface-2 px-4 py-3 text-sm font-semibold text-txt-secondary transition-colors hover:border-status-danger/40 hover:bg-status-danger-bg hover:text-status-danger focus:outline-none focus:ring-2 focus:ring-status-danger/20'
+            >
+              {t("logout_button")}
+            </button>
+          </form>
+        </div>
       </div>
     </div>
   );

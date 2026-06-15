@@ -3,27 +3,15 @@
 import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  Loader2,
-  User,
-  Building2,
-  Mail,
-  Lock,
-  AlertCircle,
-} from "lucide-react";
-import {
-  registrationInfoSchema,
-  type RegistrationInfoInput,
-} from "../_utils/validation";
-import Link from "next/link";
+import { Loader2, Mail, Lock, AlertCircle } from "lucide-react";
+import { loginSchema, type LoginInput } from "../_utils/validation";
 
-interface InfoFormProps {
+interface LoginFormProps {
   onSubmit: (data: Record<string, string>) => void;
   isPending: boolean;
-  locale: string;
 }
 
-export function InfoForm({ onSubmit, isPending, locale }: InfoFormProps) {
+export function LoginForm({ onSubmit, isPending }: LoginFormProps) {
   const t = useTranslations("Auth");
 
   const {
@@ -32,8 +20,8 @@ export function InfoForm({ onSubmit, isPending, locale }: InfoFormProps) {
     formState: { errors },
     trigger,
     getValues,
-  } = useForm<RegistrationInfoInput>({
-    resolver: zodResolver(registrationInfoSchema),
+  } = useForm<LoginInput>({
+    resolver: zodResolver(loginSchema),
     mode: "onSubmit",
     reValidateMode: "onChange",
   });
@@ -41,7 +29,7 @@ export function InfoForm({ onSubmit, isPending, locale }: InfoFormProps) {
   const translateError = (message?: string) =>
     message ? t(message as Parameters<typeof t>[0]) : undefined;
 
-  const onValid = (data: RegistrationInfoInput) =>
+  const onValid = (data: LoginInput) =>
     onSubmit(data as Record<string, string>);
 
   return (
@@ -50,66 +38,6 @@ export function InfoForm({ onSubmit, isPending, locale }: InfoFormProps) {
       className='space-y-5 text-start'
       noValidate
     >
-      {/* Full Name */}
-      <div className='space-y-1.5'>
-        <label className='text-xs font-semibold tracking-wide text-txt-secondary'>
-          {t("owner_name_label")}
-        </label>
-        <div className='group relative'>
-          <User
-            className={`pointer-events-none absolute start-3.5 top-1/2 h-4 w-4 -translate-y-1/2 transition-colors group-focus-within:text-gold ${errors.name ? "text-status-danger" : "text-txt-muted"}`}
-          />
-          <input
-            type='text'
-            {...register("name", {
-              onBlur: () => {
-                if (getValues("name")) trigger("name");
-              },
-            })}
-            aria-invalid={!!errors.name}
-            className={`w-full rounded-md border bg-surface-2/80 py-2.5 ps-10 pe-3.5 text-sm text-txt-primary placeholder:text-txt-muted transition-all focus:outline-none focus:ring-2 disabled:opacity-50 ${errors.name ? "border-status-danger focus:border-status-danger focus:ring-status-danger/20" : "border-border focus:border-gold focus:bg-surface-2 focus:ring-gold/20"}`}
-            placeholder={t("owner_name_placeholder")}
-            disabled={isPending}
-          />
-        </div>
-        {errors.name && (
-          <p className='flex items-center gap-1.5 text-xs text-status-danger'>
-            <AlertCircle className='h-3.5 w-3.5 shrink-0' />
-            {translateError(errors.name.message)}
-          </p>
-        )}
-      </div>
-
-      {/* Restaurant Name */}
-      <div className='space-y-1.5'>
-        <label className='text-xs font-semibold tracking-wide text-txt-secondary'>
-          {t("restaurant_name_label")}
-        </label>
-        <div className='group relative'>
-          <Building2
-            className={`pointer-events-none absolute start-3.5 top-1/2 h-4 w-4 -translate-y-1/2 transition-colors group-focus-within:text-gold ${errors.restaurantName ? "text-status-danger" : "text-txt-muted"}`}
-          />
-          <input
-            type='text'
-            {...register("restaurantName", {
-              onBlur: () => {
-                if (getValues("restaurantName")) trigger("restaurantName");
-              },
-            })}
-            aria-invalid={!!errors.restaurantName}
-            className={`w-full rounded-md border bg-surface-2/80 py-2.5 ps-10 pe-3.5 text-sm text-txt-primary placeholder:text-txt-muted transition-all focus:outline-none focus:ring-2 disabled:opacity-50 ${errors.restaurantName ? "border-status-danger focus:border-status-danger focus:ring-status-danger/20" : "border-border focus:border-gold focus:bg-surface-2 focus:ring-gold/20"}`}
-            placeholder={t("restaurant_name_placeholder")}
-            disabled={isPending}
-          />
-        </div>
-        {errors.restaurantName && (
-          <p className='flex items-center gap-1.5 text-xs text-status-danger'>
-            <AlertCircle className='h-3.5 w-3.5 shrink-0' />
-            {translateError(errors.restaurantName.message)}
-          </p>
-        )}
-      </div>
-
       {/* Email */}
       <div className='space-y-1.5'>
         <label className='text-xs font-semibold tracking-wide text-txt-secondary'>
@@ -164,13 +92,11 @@ export function InfoForm({ onSubmit, isPending, locale }: InfoFormProps) {
             disabled={isPending}
           />
         </div>
-        {errors.password ? (
+        {errors.password && (
           <p className='flex items-center gap-1.5 text-xs text-status-danger'>
             <AlertCircle className='h-3.5 w-3.5 shrink-0' />
             {translateError(errors.password.message)}
           </p>
-        ) : (
-          <p className='text-[11px] text-txt-muted'>{t("password_hint")}</p>
         )}
       </div>
 
@@ -180,17 +106,8 @@ export function InfoForm({ onSubmit, isPending, locale }: InfoFormProps) {
         className='group relative mt-3 flex w-full items-center justify-center gap-2 overflow-hidden rounded-md bg-gradient-to-r from-gold to-gold-dim px-4 py-3 text-sm font-semibold text-surface-0 shadow-lg shadow-gold/10 transition-all hover:shadow-gold/25 hover:brightness-110 focus:outline-none focus:ring-2 focus:ring-gold/40 disabled:cursor-not-allowed disabled:opacity-60 disabled:brightness-100'
       >
         {isPending && <Loader2 className='h-4 w-4 animate-spin' />}
-        {t("continue_button")}
+        {t("login_button")}
       </button>
-      <p className='text-center text-xs text-txt-muted'>
-        {t("have_account")}{" "}
-        <Link
-          href={`/${locale}/login`}
-          className='font-semibold text-gold hover:text-gold-light transition-colors'
-        >
-          {t("login")}
-        </Link>
-      </p>
     </form>
   );
 }
