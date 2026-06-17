@@ -2,8 +2,10 @@
 
 import { useTranslations } from "next-intl";
 import Link from "next/link";
+import Image from "next/image";
 import { LoginForm } from "./login-form";
 import { useLoginForm } from "../hooks/use-login-form";
+import { GoogleSignInButton } from "@/components/ui/google-sign-in-button";
 
 interface LoginCardProps {
   locale: string;
@@ -11,51 +13,68 @@ interface LoginCardProps {
 
 export function LoginCard({ locale }: LoginCardProps) {
   const t = useTranslations("Auth");
-  const { isPending, error, handleLogin } = useLoginForm(locale);
+  const { handleLogin, isPending, error } = useLoginForm(locale);
 
   return (
-    <div className='relative z-10 w-full max-w-md'>
-      {/* Top accent glow bar */}
-      <div className='absolute -top-px start-6 end-6 h-px bg-gradient-to-r from-transparent via-gold/60 to-transparent' />
-
-      <div className='space-y-7 rounded-xl border border-border bg-gradient-to-b from-surface-1 to-surface-1/60 p-8 shadow-2xl shadow-black/50 backdrop-blur-sm sm:p-9'>
-        {/* Brand mark + header */}
-        <div className='flex flex-col items-center space-y-5 text-center'>
-          {/* Logo */}
-          <div className='relative flex h-24 w-24 shrink-0 items-center justify-center'>
-            <img
-              src='/mazaya-logo.png'
-              alt='Mazaya'
-              className='h-full w-full object-contain drop-shadow-lg'
-            />
-          </div>
-
-          <h2 className='text-2xl font-bold tracking-tight text-txt-primary'>
-            {t("login_title")}
-          </h2>
-        </div>
-
-        {/* Error banner */}
-        {error && (
-          <div className='flex items-start gap-2.5 rounded-md border border-status-danger-bg bg-status-danger-bg px-3.5 py-3 text-sm font-medium text-status-danger'>
-            <span className='mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-status-danger' />
-            <span>{error}</span>
-          </div>
-        )}
-
-        <LoginForm onSubmit={handleLogin} isPending={isPending} />
-
-        {/* Register link */}
-        <p className='text-center text-xs text-txt-muted'>
-          {t("no_account")}{" "}
-          <Link
-            href={`/${locale}/register`}
-            className='font-semibold text-gold hover:text-gold-light transition-colors'
-          >
-            {t("register")}
-          </Link>
-        </p>
+    <div
+      className='w-full max-w-[400px] bg-white rounded-2xl shadow-xl p-8 md:p-10'
+      dir={locale === "ar" ? "rtl" : "ltr"}
+    >
+      {/* Logo */}
+      <div className='flex justify-center mb-6'>
+        <Image
+          src='/logo.svg'
+          alt='Mazaya'
+          width={80}
+          height={40}
+          className='object-contain'
+          priority
+        />
       </div>
+
+      {/* Heading */}
+      <div className='mb-6 text-center'>
+        <h1 className='text-[22px] font-bold text-gray-900 leading-tight mb-1'>
+          {t("login_title")}
+        </h1>
+        <p className='text-sm text-gray-500'>{t("login_subtitle")}</p>
+      </div>
+
+      {/* Error banner */}
+      {error && (
+        <div className='mb-4 px-4 py-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600 text-center'>
+          {error}
+        </div>
+      )}
+
+      {/* Google OAuth */}
+      <GoogleSignInButton locale={locale} />
+
+      {/* Divider */}
+      <div className='relative my-5'>
+        <div className='absolute inset-0 flex items-center'>
+          <div className='w-full border-t border-gray-200' />
+        </div>
+        <div className='relative flex justify-center'>
+          <span className='bg-white px-3 text-xs text-gray-400'>
+            {t("or_continue_with_email")}
+          </span>
+        </div>
+      </div>
+
+      {/* Form */}
+      <LoginForm onSubmit={handleLogin} isPending={isPending} locale={locale} />
+
+      {/* Register link */}
+      <p className='mt-5 text-center text-sm text-gray-500'>
+        {t("no_account")}{" "}
+        <Link
+          href={`/${locale}/register`}
+          className='text-[#22c55e] font-medium hover:underline'
+        >
+          {t("register")}
+        </Link>
+      </p>
     </div>
   );
 }

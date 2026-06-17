@@ -4,142 +4,148 @@ import { db } from "@/lib/db";
 import nodemailer from "nodemailer";
 import crypto from "crypto";
 import bcrypt from "bcrypt";
-import { registrationInfoSchema } from "./_utils/validation";
+import { slugify, generateVerificationCode } from "@/lib/utils";
+import { registrationInfoSchema, otpSchema } from "./_utils/validation";
 
-// Global reusable nodemailer transport using your verified Gmail configuration
+// ── Types ──
+
+export type ActionResult =
+  | { success: true; message: string }
+  | { success: false; message: string };
+
+// ── Mailer ──
+
 const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: parseInt(process.env.SMTP_PORT || "587"),
-  secure: process.env.SMTP_SECURE === "true",
+  service: "gmail",
   auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
+    user: process.env.GMAIL_USER,
+    pass: process.env.GMAIL_APP_PASSWORD,
   },
 });
 
-/**
- * Stage 1 Action: Validates form input data, saves a verification token code.
- */
-export async function initiateRegistration(formData: FormData) {
-  try {
-    const rawData = Object.fromEntries(formData.entries());
-    const validationResult = registrationInfoSchema.safeParse(rawData);
+// ── Stage 1: Initiate registration — validate, send OTP ──
 
-    if (!validationResult.success) {
-      return {
-        success: false,
-        message: validationResult.error.issues[0].message, // Type-safe Zod accessor
-      };
-    }
+export async function initiateRegistration(
+  formData: FormData,
+): Promise<ActionResult> {
+  const raw = {
+    name: formData.get("name"),
+    email: formData.get("email"),
+    password: formData.get("password"),
+  };
 
-    const { email } = validationResult.data;
-
-    // Check if the user email is already taken in the database
-    const existingUser = await db.user.findUnique({ where: { email } });
-    if (existingUser) {
-      return { success: false, message: "errors.email_taken" };
-    }
-
-    // Generate secure 6-digit confirmation token pin
-    const verificationCode = crypto.randomInt(100000, 999999).toString();
-    const tokenExpiry = new Date(Date.now() + 15 * 60 * 1000); // 15 Minute life span
-
-    // Persist code inside your explicit VerificationToken table model
-    await db.verificationToken.upsert({
-      where: { token: verificationCode },
-      update: {
-        email,
-        expiresAt: tokenExpiry,
-      },
-      create: {
-        email,
-        token: verificationCode,
-        expiresAt: tokenExpiry,
-      },
-    });
-
-    // Dispatch message via Gmail SMTP engine securely
-    await transporter.sendMail({
-      from: process.env.SMTP_FROM,
-      to: email,
-      subject: "Mazaya - Verify Your Registration Token",
-      text: `Your confirmation code is: ${verificationCode}`,
-      html: `
-        <div style="font-family: sans-serif; padding: 24px; max-width: 480px; margin: 0 auto; border: 1px solid #f0f0f0; border-radius: 16px;">
-          <h2 style="color: #ea580c; font-weight: 900; text-align: center;">مزايا</h2>
-          <p style="font-size: 14px; color: #4b5563;">Thank you for signing up. Use the verification token code below to complete your restaurant account activation:</p>
-          <div style="background: #f9fafb; padding: 16px; text-align: center; font-size: 26px; font-weight: bold; letter-spacing: 4px; color: #111827; border-radius: 12px; margin: 20px 0; border: 1px solid #f3f4f6;">
-            ${verificationCode}
-          </div>
-          <p style="font-size: 11px; color: #9ca3af; text-align: center;">This security code expires in 15 minutes.</p>
-        </div>
-      `,
-    });
-
-    return { success: true, step: "OTP", message: "success.code_sent" };  } catch (error) {
-    console.error("Registration Initiation Failure:", error);
-    const errorMessage = error instanceof Error ? error.message : "System failure during email transmission.";
-    return { success: false, message: errorMessage };
+  const parsed = registrationInfoSchema.safeParse(raw);
+  if (!parsed.success) {
+    return { success: false, message: parsed.error.issues[0].message };
   }
+
+  const { email, name } = parsed.data;
+
+  // Check for duplicate email
+  const existing = await db.user.findUnique({ where: { email } });
+  if (existing) {
+    return { success: false, message: "errors.email_taken" };
+  }
+
+  // Generate and store OTP
+  const code = generateVerificationCode();
+  const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 min
+
+  await db.verificationToken.upsert({
+    where: { email_token: { email, token: code } },
+    update: { token: code, expiresAt },
+    create: { id: crypto.randomUUID(), email, token: code, expiresAt },
+  });
+
+  // Send OTP email
+  await transporter.sendMail({
+    from: `"Mazaya" <${process.env.GMAIL_USER}>`,
+    to: email,
+    subject: "Your Mazaya verification code",
+    html: `
+      <div style="font-family:sans-serif;max-width:400px;margin:auto">
+        <h2>مرحباً ${name}</h2>
+        <p>Your verification code is:</p>
+        <h1 style="letter-spacing:8px;color:#22c55e">${code}</h1>
+        <p>This code expires in 15 minutes.</p>
+      </div>
+    `,
+  });
+
+  return { success: true, message: "success.code_sent" };
 }
 
-/**
- * Stage 2 Action: Matches verification token and writes the unified Tenant + User records down.
- */
-export async function confirmRegistration(email: string, code: string, rawFormData: unknown) {
-  try {
-    // 1. Locate and validate the token code
-    const tokenRecord = await db.verificationToken.findUnique({ where: { token: code } });
+// ── Stage 2: Confirm OTP — create Tenant + User atomically ──
 
-    if (!tokenRecord || tokenRecord.email !== email || new Date() > tokenRecord.expiresAt) {
-      return { success: false, message: "errors.otp_invalid" };
-    }
+export async function confirmRegistration(
+  email: string,
+  otpCode: string,
+  rawFormData: FormData,
+): Promise<ActionResult> {
+  // Validate OTP format
+  const otpParsed = otpSchema.safeParse({ code: otpCode });
+  if (!otpParsed.success) {
+    return { success: false, message: otpParsed.error.issues[0].message };
+  }
 
-    // 2. Reparse form data to ensure absolute data validity prior to database commit
-    const validationResult = registrationInfoSchema.safeParse(rawFormData);
-    if (!validationResult.success) {
-      return { success: false, message: "errors.invalid_state" };
-    }
+  // Re-validate form data for security
+  const infoParsed = registrationInfoSchema.safeParse({
+    name: rawFormData.get("name"),
+    email: rawFormData.get("email"),
+    password: rawFormData.get("password"),
+  });
+  if (!infoParsed.success) {
+    return { success: false, message: infoParsed.error.issues[0].message };
+  }
 
-    const { name, restaurantName, password } = validationResult.data;
-    const hashedPassword = await bcrypt.hash(password, 10);
-    
-    // Auto slugify restaurant string name
-    const tenantSlug = restaurantName
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/(^-|-$)+/g, "");
+  const { name, password } = infoParsed.data;
 
-    // 3. Complete database entries atomically inside a clean Prisma isolation transaction
-    await db.$transaction(async (tx) => {
-      // Create the Tenant workspace matching your custom schema status defaults
-      const tenant = await tx.tenant.create({
-        data: {
-          name: restaurantName,
-          slug: tenantSlug,
-          status: "PENDING", // Matches TenantStatus enum
-        },
-      });
+  // Find and validate the token
+  const token = await db.verificationToken.findFirst({
+    where: { email, token: otpCode },
+  });
 
-      // Create the core User profile matching your exact field structures
-      await tx.user.create({
-        data: {
-          email,
-          name,
-          password: hashedPassword, // Matches your schema's "password" property
-          role: "OWNER",           // Matches UserRole enum
-          tenantId: tenant.id,     // Satisfies strict non-nullable relation constraint
-        },
-      });
+  if (!token) {
+    return { success: false, message: "errors.otp_invalid" };
+  }
 
-      // Purge the used verification token cleanly
-      await tx.verificationToken.delete({ where: { token: code } });
+  if (token.expiresAt < new Date()) {
+    return { success: false, message: "errors.otp_expired" };
+  }
+
+  // Generate unique slug from user name
+  const baseSlug = slugify(name);
+  const existingTenant = await db.tenant.findUnique({
+    where: { slug: baseSlug },
+  });
+  const slug = existingTenant ? `${baseSlug}-${Date.now()}` : baseSlug;
+
+  const hashedPassword = await bcrypt.hash(password, 12);
+
+  // Create Tenant + User atomically
+  await db.$transaction(async (tx) => {
+    const tenant = await tx.tenant.create({
+      data: {
+        name,
+        slug,
+        status: "PENDING",
+      },
     });
 
-    return { success: true, message: "success.account_created" };
-  } catch (error) {
-    console.error("Registration Finalization Failure:", error);
-    const errorMessage = error instanceof Error ? error.message : "Database transaction commitment failed.";
-    return { success: false, message: errorMessage };
-  }
+    await tx.user.create({
+      data: {
+        name,
+        email,
+        password: hashedPassword,
+        emailVerified: new Date(),
+        role: "OWNER",
+        tenantId: tenant.id,
+      },
+    });
+
+    // Purge the used token
+    await tx.verificationToken.delete({ where: { id: token.id } });
+  });
+
+  return { success: true, message: "success.account_created" };
 }

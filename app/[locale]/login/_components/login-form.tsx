@@ -3,67 +3,69 @@
 import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2, Mail, Lock, AlertCircle } from "lucide-react";
+import { Loader2, Eye, EyeOff } from "lucide-react";
+import { useState } from "react";
 import { loginSchema, type LoginInput } from "../_utils/validation";
 
 interface LoginFormProps {
   onSubmit: (data: Record<string, string>) => void;
   isPending: boolean;
+  locale: string;
 }
 
-export function LoginForm({ onSubmit, isPending }: LoginFormProps) {
+export function LoginForm({ onSubmit, isPending, locale }: LoginFormProps) {
   const t = useTranslations("Auth");
+  const isRtl = locale === "ar";
+  const [showPassword, setShowPassword] = useState(false);
 
   const {
     register,
     handleSubmit,
     formState: { errors },
-    trigger,
-    getValues,
   } = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
-    mode: "onSubmit",
-    reValidateMode: "onChange",
   });
 
-  const translateError = (message?: string) =>
-    message ? t(message as Parameters<typeof t>[0]) : undefined;
+  const translateError = (message?: string) => {
+    if (!message) return undefined;
+    try {
+      return t(message as Parameters<typeof t>[0]);
+    } catch {
+      return message;
+    }
+  };
 
-  const onValid = (data: LoginInput) =>
+  const onValid = (data: LoginInput) => {
     onSubmit(data as Record<string, string>);
+  };
 
   return (
-    <form
-      onSubmit={handleSubmit(onValid)}
-      className='space-y-5 text-start'
-      noValidate
-    >
+    <form onSubmit={handleSubmit(onValid)} noValidate className='space-y-4'>
       {/* Email */}
       <div className='space-y-1.5'>
-        <label className='text-xs font-semibold tracking-wide text-txt-secondary'>
+        <label
+          htmlFor='email'
+          className='block text-sm font-medium text-gray-700'
+        >
           {t("email_label")}
         </label>
-        <div className='group relative'>
-          <Mail
-            className={`pointer-events-none absolute start-3.5 top-1/2 h-4 w-4 -translate-y-1/2 transition-colors group-focus-within:text-gold ${errors.email ? "text-status-danger" : "text-txt-muted"}`}
-          />
-          <input
-            type='email'
-            {...register("email", {
-              onBlur: () => {
-                if (getValues("email")) trigger("email");
-              },
-            })}
-            aria-invalid={!!errors.email}
-            dir='ltr'
-            className={`w-full rounded-md border bg-surface-2/80 py-2.5 ps-10 pe-3.5 text-start text-sm text-txt-primary placeholder:text-txt-muted transition-all focus:outline-none focus:ring-2 disabled:opacity-50 ${errors.email ? "border-status-danger focus:border-status-danger focus:ring-status-danger/20" : "border-border focus:border-gold focus:bg-surface-2 focus:ring-gold/20"}`}
-            placeholder={t("email_placeholder")}
-            disabled={isPending}
-          />
-        </div>
+        <input
+          id='email'
+          type='email'
+          autoComplete='email'
+          placeholder={t("email_placeholder")}
+          dir='ltr'
+          {...register("email")}
+          className={`w-full h-10 px-3 rounded-lg border text-sm bg-white text-gray-900 placeholder:text-gray-400 outline-none transition-colors
+            ${isRtl ? "text-right" : "text-left"}
+            ${
+              errors.email
+                ? "border-red-400 focus:border-red-500"
+                : "border-gray-200 focus:border-[#22c55e]"
+            }`}
+        />
         {errors.email && (
-          <p className='flex items-center gap-1.5 text-xs text-status-danger'>
-            <AlertCircle className='h-3.5 w-3.5 shrink-0' />
+          <p className='text-xs text-red-500'>
             {translateError(errors.email.message)}
           </p>
         )}
@@ -71,41 +73,56 @@ export function LoginForm({ onSubmit, isPending }: LoginFormProps) {
 
       {/* Password */}
       <div className='space-y-1.5'>
-        <label className='text-xs font-semibold tracking-wide text-txt-secondary'>
+        <label
+          htmlFor='password'
+          className='block text-sm font-medium text-gray-700'
+        >
           {t("password_label")}
         </label>
-        <div className='group relative'>
-          <Lock
-            className={`pointer-events-none absolute start-3.5 top-1/2 h-4 w-4 -translate-y-1/2 transition-colors group-focus-within:text-gold ${errors.password ? "text-status-danger" : "text-txt-muted"}`}
-          />
+        <div className='relative'>
           <input
-            type='password'
-            {...register("password", {
-              onBlur: () => {
-                if (getValues("password")) trigger("password");
-              },
-            })}
-            aria-invalid={!!errors.password}
-            dir='ltr'
-            className={`w-full rounded-md border bg-surface-2/80 py-2.5 ps-10 pe-3.5 text-start text-sm text-txt-primary placeholder:text-txt-muted transition-all focus:outline-none focus:ring-2 disabled:opacity-50 ${errors.password ? "border-status-danger focus:border-status-danger focus:ring-status-danger/20" : "border-border focus:border-gold focus:bg-surface-2 focus:ring-gold/20"}`}
-            placeholder='••••••••'
-            disabled={isPending}
+            id='password'
+            type={showPassword ? "text" : "password"}
+            autoComplete='current-password'
+            placeholder={isRtl ? "أدخل كلمة المرور" : "Enter your password"}
+            {...register("password")}
+            className={`w-full h-10 px-3 rounded-lg border text-sm bg-white text-gray-900 placeholder:text-gray-400 outline-none transition-colors
+              ${isRtl ? "pr-3 pl-10" : "pl-3 pr-10"}
+              ${
+                errors.password
+                  ? "border-red-400 focus:border-red-500"
+                  : "border-gray-200 focus:border-[#22c55e]"
+              }`}
           />
+          <button
+            type='button'
+            onClick={() => setShowPassword((p) => !p)}
+            className={`absolute top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors
+              ${isRtl ? "left-3" : "right-3"}`}
+            tabIndex={-1}
+            aria-label={showPassword ? "Hide password" : "Show password"}
+          >
+            {showPassword ? (
+              <EyeOff className='w-4 h-4' />
+            ) : (
+              <Eye className='w-4 h-4' />
+            )}
+          </button>
         </div>
         {errors.password && (
-          <p className='flex items-center gap-1.5 text-xs text-status-danger'>
-            <AlertCircle className='h-3.5 w-3.5 shrink-0' />
+          <p className='text-xs text-red-500'>
             {translateError(errors.password.message)}
           </p>
         )}
       </div>
 
+      {/* Submit */}
       <button
         type='submit'
         disabled={isPending}
-        className='group relative mt-3 flex w-full items-center justify-center gap-2 overflow-hidden rounded-md bg-gradient-to-r from-gold to-gold-dim px-4 py-3 text-sm font-semibold text-surface-0 shadow-lg shadow-gold/10 transition-all hover:shadow-gold/25 hover:brightness-110 focus:outline-none focus:ring-2 focus:ring-gold/40 disabled:cursor-not-allowed disabled:opacity-60 disabled:brightness-100'
+        className='w-full h-10 rounded-lg bg-[#22c55e] hover:bg-[#16a34a] active:bg-[#15803d] text-white text-sm font-semibold transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-2'
       >
-        {isPending && <Loader2 className='h-4 w-4 animate-spin' />}
+        {isPending && <Loader2 className='w-4 h-4 animate-spin' />}
         {t("login_button")}
       </button>
     </form>

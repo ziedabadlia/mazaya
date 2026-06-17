@@ -3,19 +3,12 @@
 import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  Loader2,
-  User,
-  Building2,
-  Mail,
-  Lock,
-  AlertCircle,
-} from "lucide-react";
+import { Loader2, Eye, EyeOff } from "lucide-react";
+import { useState } from "react";
 import {
   registrationInfoSchema,
   type RegistrationInfoInput,
 } from "../_utils/validation";
-import Link from "next/link";
 
 interface InfoFormProps {
   onSubmit: (data: Record<string, string>) => void;
@@ -25,172 +18,133 @@ interface InfoFormProps {
 
 export function InfoForm({ onSubmit, isPending, locale }: InfoFormProps) {
   const t = useTranslations("Auth");
+  const isRtl = locale === "ar";
+  const [showPassword, setShowPassword] = useState(false);
 
   const {
     register,
     handleSubmit,
     formState: { errors },
-    trigger,
-    getValues,
   } = useForm<RegistrationInfoInput>({
     resolver: zodResolver(registrationInfoSchema),
-    mode: "onSubmit",
-    reValidateMode: "onChange",
   });
 
-  const translateError = (message?: string) =>
-    message ? t(message as Parameters<typeof t>[0]) : undefined;
+  const resolveError = (message?: string): string | undefined => {
+    if (!message) return undefined;
+    try {
+      return t(message as Parameters<typeof t>[0]);
+    } catch {
+      return message;
+    }
+  };
 
-  const onValid = (data: RegistrationInfoInput) =>
+  const onValid = (data: RegistrationInfoInput) => {
     onSubmit(data as Record<string, string>);
+  };
 
   return (
-    <form
-      onSubmit={handleSubmit(onValid)}
-      className='space-y-5 text-start'
-      noValidate
-    >
+    <form onSubmit={handleSubmit(onValid)} noValidate className='space-y-4'>
       {/* Full Name */}
       <div className='space-y-1.5'>
-        <label className='text-xs font-semibold tracking-wide text-txt-secondary'>
+        <label
+          htmlFor='name'
+          className='block text-sm font-medium text-gray-700'
+        >
           {t("owner_name_label")}
         </label>
-        <div className='group relative'>
-          <User
-            className={`pointer-events-none absolute start-3.5 top-1/2 h-4 w-4 -translate-y-1/2 transition-colors group-focus-within:text-gold ${errors.name ? "text-status-danger" : "text-txt-muted"}`}
-          />
-          <input
-            type='text'
-            {...register("name", {
-              onBlur: () => {
-                if (getValues("name")) trigger("name");
-              },
-            })}
-            aria-invalid={!!errors.name}
-            className={`w-full rounded-md border bg-surface-2/80 py-2.5 ps-10 pe-3.5 text-sm text-txt-primary placeholder:text-txt-muted transition-all focus:outline-none focus:ring-2 disabled:opacity-50 ${errors.name ? "border-status-danger focus:border-status-danger focus:ring-status-danger/20" : "border-border focus:border-gold focus:bg-surface-2 focus:ring-gold/20"}`}
-            placeholder={t("owner_name_placeholder")}
-            disabled={isPending}
-          />
-        </div>
+        <input
+          id='name'
+          type='text'
+          autoComplete='name'
+          placeholder={t("owner_name_placeholder")}
+          {...register("name")}
+          className={`w-full h-10 px-3 rounded-lg border text-sm bg-white text-gray-900 placeholder:text-gray-400 outline-none transition-colors
+            ${isRtl ? "text-right" : "text-left"}
+            ${errors.name ? "border-red-400 focus:border-red-500" : "border-gray-200 focus:border-[#22c55e]"}`}
+        />
         {errors.name && (
-          <p className='flex items-center gap-1.5 text-xs text-status-danger'>
-            <AlertCircle className='h-3.5 w-3.5 shrink-0' />
-            {translateError(errors.name.message)}
-          </p>
-        )}
-      </div>
-
-      {/* Restaurant Name */}
-      <div className='space-y-1.5'>
-        <label className='text-xs font-semibold tracking-wide text-txt-secondary'>
-          {t("restaurant_name_label")}
-        </label>
-        <div className='group relative'>
-          <Building2
-            className={`pointer-events-none absolute start-3.5 top-1/2 h-4 w-4 -translate-y-1/2 transition-colors group-focus-within:text-gold ${errors.restaurantName ? "text-status-danger" : "text-txt-muted"}`}
-          />
-          <input
-            type='text'
-            {...register("restaurantName", {
-              onBlur: () => {
-                if (getValues("restaurantName")) trigger("restaurantName");
-              },
-            })}
-            aria-invalid={!!errors.restaurantName}
-            className={`w-full rounded-md border bg-surface-2/80 py-2.5 ps-10 pe-3.5 text-sm text-txt-primary placeholder:text-txt-muted transition-all focus:outline-none focus:ring-2 disabled:opacity-50 ${errors.restaurantName ? "border-status-danger focus:border-status-danger focus:ring-status-danger/20" : "border-border focus:border-gold focus:bg-surface-2 focus:ring-gold/20"}`}
-            placeholder={t("restaurant_name_placeholder")}
-            disabled={isPending}
-          />
-        </div>
-        {errors.restaurantName && (
-          <p className='flex items-center gap-1.5 text-xs text-status-danger'>
-            <AlertCircle className='h-3.5 w-3.5 shrink-0' />
-            {translateError(errors.restaurantName.message)}
+          <p className='text-xs text-red-500'>
+            {resolveError(errors.name.message)}
           </p>
         )}
       </div>
 
       {/* Email */}
       <div className='space-y-1.5'>
-        <label className='text-xs font-semibold tracking-wide text-txt-secondary'>
+        <label
+          htmlFor='email'
+          className='block text-sm font-medium text-gray-700'
+        >
           {t("email_label")}
         </label>
-        <div className='group relative'>
-          <Mail
-            className={`pointer-events-none absolute start-3.5 top-1/2 h-4 w-4 -translate-y-1/2 transition-colors group-focus-within:text-gold ${errors.email ? "text-status-danger" : "text-txt-muted"}`}
-          />
-          <input
-            type='email'
-            {...register("email", {
-              onBlur: () => {
-                if (getValues("email")) trigger("email");
-              },
-            })}
-            aria-invalid={!!errors.email}
-            dir='ltr'
-            className={`w-full rounded-md border bg-surface-2/80 py-2.5 ps-10 pe-3.5 text-start text-sm text-txt-primary placeholder:text-txt-muted transition-all focus:outline-none focus:ring-2 disabled:opacity-50 ${errors.email ? "border-status-danger focus:border-status-danger focus:ring-status-danger/20" : "border-border focus:border-gold focus:bg-surface-2 focus:ring-gold/20"}`}
-            placeholder={t("email_placeholder")}
-            disabled={isPending}
-          />
-        </div>
+        <input
+          id='email'
+          type='email'
+          autoComplete='email'
+          placeholder={t("email_placeholder")}
+          dir='ltr'
+          {...register("email")}
+          className={`w-full h-10 px-3 rounded-lg border text-sm bg-white text-gray-900 placeholder:text-gray-400 outline-none transition-colors
+            ${isRtl ? "text-right" : "text-left"}
+            ${errors.email ? "border-red-400 focus:border-red-500" : "border-gray-200 focus:border-[#22c55e]"}`}
+        />
         {errors.email && (
-          <p className='flex items-center gap-1.5 text-xs text-status-danger'>
-            <AlertCircle className='h-3.5 w-3.5 shrink-0' />
-            {translateError(errors.email.message)}
+          <p className='text-xs text-red-500'>
+            {resolveError(errors.email.message)}
           </p>
         )}
       </div>
 
       {/* Password */}
       <div className='space-y-1.5'>
-        <label className='text-xs font-semibold tracking-wide text-txt-secondary'>
+        <label
+          htmlFor='password'
+          className='block text-sm font-medium text-gray-700'
+        >
           {t("password_label")}
         </label>
-        <div className='group relative'>
-          <Lock
-            className={`pointer-events-none absolute start-3.5 top-1/2 h-4 w-4 -translate-y-1/2 transition-colors group-focus-within:text-gold ${errors.password ? "text-status-danger" : "text-txt-muted"}`}
-          />
+        <div className='relative'>
           <input
-            type='password'
-            {...register("password", {
-              onBlur: () => {
-                if (getValues("password")) trigger("password");
-              },
-            })}
-            aria-invalid={!!errors.password}
-            dir='ltr'
-            className={`w-full rounded-md border bg-surface-2/80 py-2.5 ps-10 pe-3.5 text-start text-sm text-txt-primary placeholder:text-txt-muted transition-all focus:outline-none focus:ring-2 disabled:opacity-50 ${errors.password ? "border-status-danger focus:border-status-danger focus:ring-status-danger/20" : "border-border focus:border-gold focus:bg-surface-2 focus:ring-gold/20"}`}
-            placeholder='••••••••'
-            disabled={isPending}
+            id='password'
+            type={showPassword ? "text" : "password"}
+            autoComplete='new-password'
+            placeholder={isRtl ? "٨ أحرف على الأقل" : "At least 8 characters"}
+            {...register("password")}
+            className={`w-full h-10 rounded-lg border text-sm bg-white text-gray-900 placeholder:text-gray-400 outline-none transition-colors
+              ${isRtl ? "pr-3 pl-10" : "pl-3 pr-10"}
+              ${errors.password ? "border-red-400 focus:border-red-500" : "border-gray-200 focus:border-[#22c55e]"}`}
           />
+          <button
+            type='button'
+            onClick={() => setShowPassword((p) => !p)}
+            tabIndex={-1}
+            aria-label={showPassword ? "Hide password" : "Show password"}
+            className={`absolute top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors
+              ${isRtl ? "left-3" : "right-3"}`}
+          >
+            {showPassword ? (
+              <EyeOff className='w-4 h-4' />
+            ) : (
+              <Eye className='w-4 h-4' />
+            )}
+          </button>
         </div>
-        {errors.password ? (
-          <p className='flex items-center gap-1.5 text-xs text-status-danger'>
-            <AlertCircle className='h-3.5 w-3.5 shrink-0' />
-            {translateError(errors.password.message)}
+        {errors.password && (
+          <p className='text-xs text-red-500'>
+            {resolveError(errors.password.message)}
           </p>
-        ) : (
-          <p className='text-[11px] text-txt-muted'>{t("password_hint")}</p>
         )}
       </div>
 
+      {/* Submit */}
       <button
         type='submit'
         disabled={isPending}
-        className='group relative mt-3 flex w-full items-center justify-center gap-2 overflow-hidden rounded-md bg-gradient-to-r from-gold to-gold-dim px-4 py-3 text-sm font-semibold text-surface-0 shadow-lg shadow-gold/10 transition-all hover:shadow-gold/25 hover:brightness-110 focus:outline-none focus:ring-2 focus:ring-gold/40 disabled:cursor-not-allowed disabled:opacity-60 disabled:brightness-100'
+        className='w-full h-10 rounded-lg bg-[#22c55e] hover:bg-[#16a34a] active:bg-[#15803d] text-white text-sm font-semibold transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-2'
       >
-        {isPending && <Loader2 className='h-4 w-4 animate-spin' />}
+        {isPending && <Loader2 className='w-4 h-4 animate-spin' />}
         {t("continue_button")}
       </button>
-      <p className='text-center text-xs text-txt-muted'>
-        {t("have_account")}{" "}
-        <Link
-          href={`/${locale}/login`}
-          className='font-semibold text-gold hover:text-gold-light transition-colors'
-        >
-          {t("login")}
-        </Link>
-      </p>
     </form>
   );
 }

@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2, ArrowLeft, KeySquare, Mail, AlertCircle } from "lucide-react";
+import { Loader2, ArrowLeft, AlertCircle, Mail } from "lucide-react";
 import { otpSchema, type OtpInput } from "../_utils/validation";
 
 interface OtpFormProps {
@@ -11,10 +11,18 @@ interface OtpFormProps {
   onBack: () => void;
   isPending: boolean;
   email: string;
+  locale: string;
 }
 
-export function OtpForm({ onVerify, onBack, isPending, email }: OtpFormProps) {
+export function OtpForm({
+  onVerify,
+  onBack,
+  isPending,
+  email,
+  locale,
+}: OtpFormProps) {
   const t = useTranslations("Auth");
+  const isRtl = locale === "ar";
 
   const {
     register,
@@ -27,85 +35,82 @@ export function OtpForm({ onVerify, onBack, isPending, email }: OtpFormProps) {
 
   // Zod messages are translation keys (e.g. "errors.otp_length"); resolve
   // them through next-intl so validation feedback matches the active locale.
-  const translateError = (message?: string) =>
-    message ? t(message as Parameters<typeof t>[0]) : undefined;
+  const translateError = (message?: string) => {
+    if (!message) return undefined;
+    try {
+      return t(message as Parameters<typeof t>[0]);
+    } catch {
+      return message;
+    }
+  };
 
   const onValid = (data: OtpInput) => {
     onVerify(data.code.trim());
   };
 
   return (
-    <form onSubmit={handleSubmit(onValid)} className="space-y-6 text-start" noValidate>
-      {/* Informative Status Card */}
-      <div className="flex flex-col items-center gap-2 rounded-md border border-border bg-surface-2/60 px-4 py-4 text-center">
-        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gold/10 text-gold ring-1 ring-gold/20">
-          <Mail className="h-4 w-4" />
-        </div>
-        <p className="text-xs leading-relaxed text-txt-secondary">
-          {t("otp_sent_notice")}
-        </p>
-        <p className="text-sm font-semibold text-txt-primary" dir="ltr">
+    <form onSubmit={handleSubmit(onValid)} noValidate className='space-y-4'>
+      {/* Email confirmation chip */}
+      <div className='flex items-center justify-center gap-2 rounded-lg bg-gray-50 border border-gray-200 px-4 py-3 text-center'>
+        <Mail className='w-4 h-4 text-gray-400 shrink-0' />
+        <p className='text-sm font-medium text-gray-700 truncate' dir='ltr'>
           {email}
         </p>
       </div>
 
-      {/* Security Token Input */}
-      <div className="space-y-1.5">
-        <label className="text-xs font-semibold tracking-wide text-txt-secondary">
+      {/* OTP Input */}
+      <div className='space-y-1.5'>
+        <label
+          htmlFor='code'
+          className='block text-sm font-medium text-gray-700 text-center'
+        >
           {t("otp_label")}
         </label>
-        <div className="group relative">
-          <KeySquare
-            className={`pointer-events-none absolute start-3.5 top-1/2 h-4 w-4 -translate-y-1/2 transition-colors group-focus-within:text-gold ${
-              errors.code ? "text-status-danger" : "text-txt-muted"
-            }`}
-          />
-          <input
-            type="text"
-            {...register("code")}
-            aria-invalid={!!errors.code}
-            maxLength={6}
-            inputMode="numeric"
-            dir="ltr"
-            className={`w-full rounded-md border bg-surface-2/80 px-4 py-3 text-center font-mono text-xl tracking-[0.5em] text-txt-primary placeholder:text-txt-muted/50 transition-all focus:outline-none focus:ring-2 disabled:opacity-50 ${
+        <input
+          id='code'
+          type='text'
+          inputMode='numeric'
+          maxLength={6}
+          dir='ltr'
+          autoFocus
+          disabled={isPending}
+          placeholder='000000'
+          {...register("code")}
+          className={`w-full h-12 px-3 rounded-lg border text-center font-mono text-xl tracking-[0.5em] bg-white text-gray-900 placeholder:text-gray-300 outline-none transition-colors disabled:opacity-60
+            ${
               errors.code
-                ? "border-status-danger focus:border-status-danger focus:ring-status-danger/20"
-                : "border-border focus:border-gold focus:bg-surface-2 focus:ring-gold/20"
+                ? "border-red-400 focus:border-red-500"
+                : "border-gray-200 focus:border-[#22c55e]"
             }`}
-            placeholder="000000"
-            disabled={isPending}
-            autoFocus
-          />
-        </div>
+        />
         {errors.code && (
-          <p className="flex items-center justify-center gap-1.5 text-xs text-status-danger">
-            <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+          <p className='flex items-center justify-center gap-1.5 text-xs text-red-500'>
+            <AlertCircle className='w-3.5 h-3.5 shrink-0' />
             {translateError(errors.code.message)}
           </p>
         )}
       </div>
 
-      {/* Action Navigation Column */}
-      <div className="flex flex-col gap-2.5 pt-1">
-        <button
-          type="submit"
-          disabled={isPending}
-          className="group relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-md bg-gradient-to-r from-gold to-gold-dim px-4 py-3 text-sm font-semibold text-surface-0 shadow-lg shadow-gold/10 transition-all hover:shadow-gold/25 hover:brightness-110 focus:outline-none focus:ring-2 focus:ring-gold/40 disabled:cursor-not-allowed disabled:opacity-60 disabled:brightness-100"
-        >
-          {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
-          {t("verify_button")}
-        </button>
+      {/* Submit */}
+      <button
+        type='submit'
+        disabled={isPending}
+        className='w-full h-10 rounded-lg bg-[#22c55e] hover:bg-[#16a34a] active:bg-[#15803d] text-white text-sm font-semibold transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-2'
+      >
+        {isPending && <Loader2 className='w-4 h-4 animate-spin' />}
+        {t("verify_button")}
+      </button>
 
-        <button
-          type="button"
-          onClick={onBack}
-          disabled={isPending}
-          className="flex w-full items-center justify-center gap-2 rounded-md border border-border bg-transparent px-4 py-2.5 text-sm font-medium text-txt-secondary transition-colors hover:border-gold/40 hover:text-gold focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          <ArrowLeft className="h-4 w-4 rtl:rotate-180" />
-          {t("back_button")}
-        </button>
-      </div>
+      {/* Back */}
+      <button
+        type='button'
+        onClick={onBack}
+        disabled={isPending}
+        className='w-full h-10 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 active:bg-gray-100 text-sm font-medium text-gray-600 transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2'
+      >
+        <ArrowLeft className={`w-4 h-4 ${isRtl ? "rotate-180" : ""}`} />
+        {t("back_button")}
+      </button>
     </form>
   );
 }

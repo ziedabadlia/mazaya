@@ -1,95 +1,110 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { initiateRegistration, confirmRegistration } from "../actions";
 import { useTranslations } from "next-intl";
+import { initiateRegistration, confirmRegistration } from "../actions";
 
 export type RegisterStep = "INFO" | "OTP";
 
+interface RegisterFormState {
+  step: RegisterStep;
+  email: string;
+  error: string | null;
+  successMessage: string | null;
+  isPending: boolean;
+}
+
 export function useRegisterForm(locale: string) {
   const router = useRouter();
+  const t = useTranslations("Auth");
   const [isPending, startTransition] = useTransition();
+
   const [step, setStep] = useState<RegisterStep>("INFO");
+  const [email, setEmail] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const t = useTranslations("Auth");
 
-  
-  // Safely hold form properties locally across multi-step rendering phases
-  const [savedFormData, setSavedFormData] = useState<Record<string, string>>({});
-  const [userEmail, setUserEmail] = useState<string>("");
+  // Hold the original FormData across steps for re-validation in stage 2
+  const formDataRef = useRef<FormData | null>(null);
+
+  const resolveMessage = (key: string): string => {
+    try {
+      return t(key as Parameters<typeof t>[0]);
+    } catch {
+      return key;
+    }
+  };
 
   /**
-   * Phase 1: Validates information data formats, updates token state registries, and emits email alerts.
+   * Phase 1 — Validate info, send OTP, advance to OTP step.
    */
-const handleInitiate = async (data: Record<string, string>) => {
-  setError(null);
-  setSuccessMessage(null);
-  setUserEmail(data.email || "");
-  setSavedFormData(data);
+  const handleInitiate = (data: Record<string, string>) => {
+    setError(null);
+    setSuccessMessage(null);
 
-  const formData = new FormData();
-  Object.entries(data).forEach(([key, value]) => formData.append(key, value));
+    const formData = new FormData();
+    Object.entries(data).forEach(([k, v]) => formData.append(k, v));
+    formDataRef.current = formData;
 
-  startTransition(async () => {
-    try {
+    startTransition(async () => {
       const result = await initiateRegistration(formData);
 
       if (!result.success) {
-        setError(t(result.message as any)); // <-- t() here
+        setError(resolveMessage(result.message));
         return;
       }
 
-      setSuccessMessage(t(result.message as any)); // <-- t() here
-      if (result.step === "OTP") setStep("OTP");
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "An unexpected error occurred.");
-    }
-  });
-};
+      setEmail(data.email);
+      setSuccessMessage(resolveMessage(result.message));
+      setStep("OTP");
+    });
+  };
 
   /**
-   * Phase 2: Matches verification token credentials and builds system account nodes.
+   * Phase 2 — Verify OTP, create account, redirect to waiting room.
    */
-  const handleVerify = async (otpCode: string) => {
-  setError(null);
-  setSuccessMessage(null);
+  const handleVerify = (otpCode: string) => {
+    setError(null);
+    setSuccessMessage(null);
 
-  startTransition(async () => {
-    try {
-      const result = await confirmRegistration(userEmail, otpCode, savedFormData);
+    if (!formDataRef.current) {
+      setError(resolveMessage("errors.unexpected"));
+      return;
+    }
+
+    const savedFormData = formDataRef.current;
+
+    startTransition(async () => {
+      const result = await confirmRegistration(email, otpCode, savedFormData);
 
       if (!result.success) {
-        setError(t(result.message as any)); // <-- t() here
+        setError(resolveMessage(result.message));
         return;
       }
 
-      setSuccessMessage(t(result.message as any)); // <-- t() here
-      setTimeout(() => {
-        router.refresh();
-        router.push(`/${locale}/waiting-room`);
-      }, 1500);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Verification failed.");
-    }
-  });
-};
+      router.push(`/${locale}/waiting-room`);
+    });
+  };
 
-  const setStepBack = () => {
+  const goBack = () => {
+    setStep("INFO");
     setError(null);
     setSuccessMessage(null);
-    setStep("INFO");
   };
 
   return {
     step,
-    isPending,
+    email,
     error,
     successMessage,
-    userEmail,
+    isPending,
     handleInitiate,
     handleVerify,
-    setStepBack,
+    goBack,
+  } satisfies RegisterFormState & {
+    handleInitiate: (data: Record<string, string>) => void;
+    handleVerify: (otpCode: string) => void;
+    goBack: () => void;
   };
 }
