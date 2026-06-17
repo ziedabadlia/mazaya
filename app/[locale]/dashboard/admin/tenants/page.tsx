@@ -2,6 +2,7 @@ import { auth } from "@/auth/index";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { TenantTable } from "./_components/tenant-table";
+import { Tenant } from "@prisma/client";
 
 export default async function TenantsPage() {
   const session = await auth();
@@ -17,8 +18,8 @@ export default async function TenantsPage() {
     },
   });
 
-  const pending = tenants.filter((t) => t.status === "PENDING");
-  const rest = tenants.filter((t) => t.status !== "PENDING");
+  const pending = tenants.filter((t: Tenant) => t.status === "PENDING");
+  const rest = tenants.filter((t: Tenant) => t.status !== "PENDING");
   const sorted = [...pending, ...rest];
 
   return (
@@ -45,13 +46,13 @@ export default async function TenantsPage() {
           },
           {
             label: "نشط",
-            count: tenants.filter((t) => t.status === "ACTIVE").length,
+            count: tenants.filter((t: Tenant) => t.status === "ACTIVE").length,
             style:
               "border-status-success/20 bg-status-success-bg text-status-success",
           },
           {
             label: "موقوف",
-            count: tenants.filter((t) => t.status === "SUSPENDED").length,
+            count: tenants.filter((t: Tenant) => t.status === "SUSPENDED").length,
             style:
               "border-status-danger/20 bg-status-danger-bg text-status-danger",
           },
