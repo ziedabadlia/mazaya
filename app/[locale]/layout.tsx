@@ -1,11 +1,15 @@
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
-import { Inter, Noto_Kufi_Arabic } from "next/font/google";
+import { Inter, IBM_Plex_Sans_Arabic } from "next/font/google";
 import "@/app/globals.css";
 
 // Load fonts for both languages
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
-const notoKufi = Noto_Kufi_Arabic({ subsets: ["arabic"], variable: "--font-noto-kufi" });
+const ibmPlexArabic = IBM_Plex_Sans_Arabic({ 
+  subsets: ["arabic"], 
+  weight: ["300", "400", "500", "600", "700"],
+  variable: "--font-ibm-plex-arabic" 
+});
 
 export default async function RootLayout({
   children,
@@ -19,7 +23,7 @@ export default async function RootLayout({
   const messages = await getMessages();
 
   const direction = locale === "ar" ? "rtl" : "ltr";
-  const fontClass = locale === "ar" ? notoKufi.variable : inter.variable;
+  const fontClass = locale === "ar" ? ibmPlexArabic.variable : inter.variable;
 
   return (
     <html lang={locale} dir={direction}>

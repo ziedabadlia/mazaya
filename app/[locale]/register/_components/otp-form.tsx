@@ -1,77 +1,116 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { Loader2, ArrowLeft, KeySquare } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader2, ArrowLeft, AlertCircle, Mail } from "lucide-react";
+import { otpSchema, type OtpInput } from "../_utils/validation";
 
 interface OtpFormProps {
   onVerify: (code: string) => void;
   onBack: () => void;
   isPending: boolean;
   email: string;
+  locale: string;
 }
 
-export function OtpForm({ onVerify, onBack, isPending, email }: OtpFormProps) {
+export function OtpForm({
+  onVerify,
+  onBack,
+  isPending,
+  email,
+  locale,
+}: OtpFormProps) {
   const t = useTranslations("Auth");
+  const isRtl = locale === "ar";
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const formData = new FormData(event.currentTarget);
-    const codeValue = formData.get("code") as string;
-    onVerify(codeValue.trim());
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<OtpInput>({
+    resolver: zodResolver(otpSchema),
+    mode: "onSubmit",
+  });
+
+  // Zod messages are translation keys (e.g. "errors.otp_length"); resolve
+  // them through next-intl so validation feedback matches the active locale.
+  const translateError = (message?: string) => {
+    if (!message) return undefined;
+    try {
+      return t(message as Parameters<typeof t>[0]);
+    } catch {
+      return message;
+    }
+  };
+
+  const onValid = (data: OtpInput) => {
+    onVerify(data.code.trim());
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5 text-start">
-      {/* Informative Status Card */}
-      <div className="rounded-xl bg-gray-50 p-3.5 border border-gray-100 text-center">
-        <p className="text-xs text-gray-500 leading-normal">
-          {t("otp_sent_notice") || "We sent a security verification pin code safely to:"}
+    <form onSubmit={handleSubmit(onValid)} noValidate className='space-y-4'>
+      {/* Email confirmation chip */}
+      <div className='flex items-center justify-center gap-2 rounded-lg bg-gray-50 border border-gray-200 px-4 py-3 text-center'>
+        <Mail className='w-4 h-4 text-gray-400 shrink-0' />
+        <p className='text-sm font-medium text-gray-700 truncate' dir='ltr'>
+          {email}
         </p>
-        <p className="text-sm font-semibold text-gray-800 truncate mt-0.5">{email}</p>
       </div>
 
-      {/* Security Token Input */}
-      <div className="space-y-1">
-        <label className="text-xs font-semibold text-gray-700">
-          {t("otp_label") || "Verification Token"}
+      {/* OTP Input */}
+      <div className='space-y-1.5'>
+        <label
+          htmlFor='code'
+          className='block text-sm font-medium text-gray-700 text-center'
+        >
+          {t("otp_label")}
         </label>
-        <div className="relative">
-          <KeySquare className="absolute start-3 top-3 h-4 w-4 text-gray-400" />
-          <input
-            type="text"
-            name="code"
-            required
-            maxLength={6}
-            pattern="\D*" // Ensure input handling filters down gracefully
-            className="w-full tracking-[0.4em] text-center font-mono text-lg rounded-xl border border-gray-200 py-2.5 px-4 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500 disabled:bg-gray-50"
-            placeholder="000000"
-            disabled={isPending}
-            autoFocus
-          />
-        </div>
+        <input
+          id='code'
+          type='text'
+          inputMode='numeric'
+          maxLength={6}
+          dir='ltr'
+          autoFocus
+          disabled={isPending}
+          placeholder='000000'
+          {...register("code")}
+          className={`w-full h-12 px-3 rounded-lg border text-center font-mono text-xl tracking-[0.5em] bg-white text-gray-900 placeholder:text-gray-300 outline-none transition-colors disabled:opacity-60
+            ${
+              errors.code
+                ? "border-red-400 focus:border-red-500"
+                : "border-gray-200 focus:border-[#22c55e]"
+            }`}
+        />
+        {errors.code && (
+          <p className='flex items-center justify-center gap-1.5 text-xs text-red-500'>
+            <AlertCircle className='w-3.5 h-3.5 shrink-0' />
+            {translateError(errors.code.message)}
+          </p>
+        )}
       </div>
 
-      {/* Action Navigation Column */}
-      <div className="flex flex-col gap-2 pt-1">
-        <button
-          type="submit"
-          disabled={isPending}
-          className="flex w-full items-center justify-center gap-2 rounded-xl bg-orange-600 px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-orange-500 transition-colors focus:outline-none disabled:bg-orange-400"
-        >
-          {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
-          {t("verify_button") || "Confirm Code & Finish"}
-        </button>
+      {/* Submit */}
+      <button
+        type='submit'
+        disabled={isPending}
+        className='w-full h-10 rounded-lg bg-[#22c55e] hover:bg-[#16a34a] active:bg-[#15803d] text-white text-sm font-semibold transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-2'
+      >
+        {isPending && <Loader2 className='w-4 h-4 animate-spin' />}
+        {t("verify_button")}
+      </button>
 
-        <button
-          type="button"
-          onClick={onBack}
-          disabled={isPending}
-          className="flex w-full items-center justify-center gap-2 rounded-xl bg-white border border-gray-200 px-4 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors focus:outline-none"
-        >
-          <ArrowLeft className="h-4 w-4 rtl:rotate-180" />
-          {t("back_button") || "Back to Info"}
-        </button>
-      </div>
+      {/* Back */}
+      <button
+        type='button'
+        onClick={onBack}
+        disabled={isPending}
+        className='w-full h-10 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 active:bg-gray-100 text-sm font-medium text-gray-600 transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2'
+      >
+        <ArrowLeft className={`w-4 h-4 ${isRtl ? "rotate-180" : ""}`} />
+        {t("back_button")}
+      </button>
     </form>
   );
 }

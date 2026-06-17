@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, X, LogOut } from "lucide-react";
-import { type NavItem } from "@/config/dashboard-nav";
+import { navIconMap, type NavItem } from "@/config/dashboard-nav";
 import { signOut } from "next-auth/react";
 import { useTranslations } from "next-intl";
 
@@ -24,52 +24,61 @@ export function DashboardSidebar({ items, user }: SidebarProps) {
 
   return (
     <>
-      {/* Mobile Header & Trigger */}
-      <div className="flex items-center justify-between border-b border-gray-200 bg-white p-4 md:hidden">
-        <span className="text-2xl font-bold text-orange-600">مزايا</span>
-        <button onClick={() => setIsOpen(!isOpen)} className="text-gray-600">
-          {isOpen ? <X size={24} /> : <Menu size={24} />}
+      {/* Mobile Header */}
+      <div className='flex items-center justify-between border-b border-border bg-surface-1 px-4 py-3 md:hidden'>
+        <img
+          src='/mazaya-logo.png'
+          alt='Mazaya'
+          className='h-8 w-8 object-contain'
+        />
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className='text-txt-secondary hover:text-txt-primary transition-colors'
+        >
+          {isOpen ? <X size={22} /> : <Menu size={22} />}
         </button>
       </div>
 
-      {/* Sidebar Navigation */}
+      {/* Sidebar */}
       <aside
         className={`
-          fixed inset-y-0 start-0 z-50 flex w-64 flex-col border-e border-gray-200 bg-white transition-transform duration-300 ease-in-out md:static md:translate-x-0
+          fixed inset-y-0 start-0 z-50 flex w-64 flex-col border-e border-border bg-surface-1 transition-transform duration-300 ease-in-out md:static md:translate-x-0
           ${isOpen ? "translate-x-0" : "translate-x-full md:translate-x-0"}
         `}
       >
-        {/* Desktop Brand Logo */}
-        <div className="hidden items-center justify-center border-b border-gray-100 py-6 md:flex">
-          <span className="text-3xl font-extrabold text-orange-600 tracking-tight">
+        {/* Desktop Logo */}
+        <div className='flex items-center gap-3 border-b border-border px-5 py-5'>
+          <img
+            src='/mazaya-logo.png'
+            alt='Mazaya'
+            className='h-10 w-10 object-contain'
+          />
+          <span className='text-lg font-bold text-gold tracking-wide'>
             مزايا
           </span>
         </div>
 
-        {/* Navigation Links */}
-        <nav className="flex-1 space-y-1 overflow-y-auto p-4">
+        {/* Nav Links */}
+        <nav className='flex-1 space-y-1 overflow-y-auto p-3'>
           {items.map((item) => {
-            // Determine active state, considering the locale prefix in the pathname
-            const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
-            
+            const isActive =
+              pathname === item.href || pathname.startsWith(`${item.href}/`);
+            const Icon = navIconMap[item.iconKey]; // <-- resolve here
+
             return (
               <Link
                 key={item.href}
                 href={item.href}
                 onClick={() => setIsOpen(false)}
-                className={`
-                  flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors
-                  ${
-                    isActive
-                      ? "bg-orange-50 text-orange-600 font-semibold"
-                      : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-                  }
-                `}
+                className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all border
+        ${
+          isActive
+            ? "bg-gold/10 text-gold border-gold/20"
+            : "text-txt-secondary hover:bg-surface-2 hover:text-txt-primary border-transparent"
+        }`}
               >
-                <item.icon
-                  className={`h-5 w-5 ${
-                    isActive ? "text-orange-600" : "text-gray-400"
-                  }`}
+                <Icon
+                  className={`h-4 w-4 shrink-0 ${isActive ? "text-gold" : "text-txt-muted"}`}
                 />
                 <span>{t(item.translationKey as any)}</span>
               </Link>
@@ -77,33 +86,36 @@ export function DashboardSidebar({ items, user }: SidebarProps) {
           })}
         </nav>
 
-        {/* User Profile & Logout Footer */}
-        <div className="border-t border-gray-100 p-4">
-          <div className="mb-4 flex items-center gap-3 px-2">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-orange-100 text-orange-700 font-bold">
+        {/* User Footer */}
+        <div className='border-t border-border p-3 space-y-1'>
+          {/* User Info */}
+          <div className='flex items-center gap-3 rounded-lg px-3 py-2.5'>
+            <div className='flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gold/10 text-sm font-bold text-gold ring-1 ring-gold/20'>
               {user.name?.charAt(0).toUpperCase() || "U"}
             </div>
-            <div className="flex flex-col truncate">
-              <span className="text-sm font-medium text-gray-900 truncate">
+            <div className='flex flex-col truncate'>
+              <span className='truncate text-sm font-medium text-txt-primary'>
                 {user.name}
               </span>
-              <span className="text-xs text-gray-500">{user.role}</span>
+              <span className='text-xs text-txt-muted'>{user.role}</span>
             </div>
           </div>
+
+          {/* Logout */}
           <button
             onClick={() => signOut({ callbackUrl: "/login" })}
-            className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-red-600 hover:bg-red-50 transition-colors"
+            className='flex w-full items-center gap-3 rounded-lg border border-transparent px-3 py-2.5 text-sm font-medium text-txt-secondary transition-all hover:border-status-danger/20 hover:bg-status-danger-bg hover:text-status-danger'
           >
-            <LogOut className="h-5 w-5" />
+            <LogOut className='h-4 w-4 shrink-0' />
             <span>{t("Logout")}</span>
           </button>
         </div>
       </aside>
 
-      {/* Mobile Overlay Background */}
+      {/* Mobile Overlay */}
       {isOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm md:hidden"
+          className='fixed inset-0 z-40 bg-black/40 backdrop-blur-sm md:hidden'
           onClick={() => setIsOpen(false)}
         />
       )}

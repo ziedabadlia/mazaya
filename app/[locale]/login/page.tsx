@@ -1,6 +1,6 @@
-import { RegisterCard } from "./_components/register-card";
+import { LoginCard } from "./_components/login-card";
 
-export default async function RegisterPage({
+export default async function LoginPage({
   params,
 }: {
   params: Promise<{ locale: string }>;
@@ -9,7 +9,7 @@ export default async function RegisterPage({
 
   return (
     <div className='min-h-screen bg-[#f4f4f5] flex items-center justify-center p-4'>
-      <RegisterCard locale={locale} />
+      <LoginCard locale={locale} />
     </div>
   );
 }

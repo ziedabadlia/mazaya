@@ -1,21 +1,32 @@
 import { UserRole } from "@prisma/client";
-import { type ComponentType, type ComponentProps } from "react";
-import { 
-  LayoutDashboard, 
-  Utensils, 
-  Store, 
-  Users, 
-  Receipt, 
-  ChefHat, 
-  Settings 
+import {
+  LayoutDashboard,
+  Utensils,
+  Store,
+  Users,
+  Receipt,
+  ChefHat,
+  Settings,
+  Shield,
 } from "lucide-react";
 
-export type SharedDashboardIcon = ComponentType<ComponentProps<typeof LayoutDashboard>>;
+export const navIconMap = {
+  LayoutDashboard,
+  Utensils,
+  Store,
+  Users,
+  Receipt,
+  ChefHat,
+  Settings,
+  Shield,
+} as const;
+
+export type NavIconKey = keyof typeof navIconMap;
 
 export interface NavItem {
-  translationKey: string; // The key used in messages/ar.json and messages/en.json
+  translationKey: string;
   href: string;
-  icon: SharedDashboardIcon; 
+  iconKey: NavIconKey;
   roles: UserRole[];
 }
 
@@ -23,43 +34,49 @@ export const dashboardNavItems: NavItem[] = [
   {
     translationKey: "Overview",
     href: "/dashboard",
-    icon: LayoutDashboard,
+    iconKey: "LayoutDashboard",
     roles: ["OWNER", "BRANCH_MANAGER"],
   },
   {
     translationKey: "POS",
     href: "/dashboard/pos",
-    icon: Receipt,
+    iconKey: "Receipt",
     roles: ["OWNER", "BRANCH_MANAGER", "CASHIER"],
   },
   {
     translationKey: "Kitchen",
     href: "/dashboard/kitchen",
-    icon: ChefHat,
+    iconKey: "ChefHat",
     roles: ["OWNER", "KITCHEN_STAFF"],
   },
   {
     translationKey: "Branches",
     href: "/dashboard/branches",
-    icon: Store,
+    iconKey: "Store",
     roles: ["OWNER"],
   },
   {
     translationKey: "Menu",
     href: "/dashboard/menu",
-    icon: Utensils,
+    iconKey: "Utensils",
     roles: ["OWNER", "BRANCH_MANAGER"],
   },
   {
     translationKey: "Staff",
     href: "/dashboard/staff",
-    icon: Users,
+    iconKey: "Users",
     roles: ["OWNER", "BRANCH_MANAGER"],
   },
   {
     translationKey: "Settings",
     href: "/dashboard/settings",
-    icon: Settings,
+    iconKey: "Settings",
     roles: ["OWNER"],
+  },
+  {
+    translationKey: "Admin",
+    href: "/dashboard/admin/tenants",
+    iconKey: "Shield",
+    roles: ["SUPER_ADMIN"],
   },
 ];
