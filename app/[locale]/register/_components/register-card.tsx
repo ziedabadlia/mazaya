@@ -28,7 +28,7 @@ export function RegisterCard({ locale }: RegisterCardProps) {
 
   return (
     <div
-      className='w-full max-w-[400px] bg-white rounded-2xl shadow-xl p-8 md:p-10'
+      className='w-full max-w-[400px] bg-white p-8 md:p-10'
       dir={locale === "ar" ? "rtl" : "ltr"}
     >
       {/* Logo */}
