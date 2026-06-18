@@ -6,10 +6,5 @@ export default async function RegisterPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-
-  return (
-    <div className='h-[100dvh] overflow-hidden bg-white flex items-center justify-center p-3 sm:p-4'>
-      <RegisterCard locale={locale} />
-    </div>
-  );
+  return <RegisterCard locale={locale} />;
 }

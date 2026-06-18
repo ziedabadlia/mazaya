@@ -1,0 +1,14 @@
+{
+  "output": {
+    "filePath": "context.xml",
+    "style": "xml",
+    "compress": true
+  },
+  "include": ["**/*"],
+  "exclude": ["node_modules/**", "dist/**", ".git/**"],
+  "processing": {
+    "removeComments": true,
+    "removeEmptyLines": true,
+    "showLineNumbers": false
+  }
+}

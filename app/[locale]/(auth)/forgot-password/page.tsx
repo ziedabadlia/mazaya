@@ -6,10 +6,5 @@ export default async function ForgotPasswordPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-
-  return (
-    <div className='h-[100dvh] overflow-hidden bg-white flex items-center justify-center p-3 sm:p-4'>
-      <ForgotPasswordCard locale={locale} />
-    </div>
-  );
+  return <ForgotPasswordCard locale={locale} />;
 }
