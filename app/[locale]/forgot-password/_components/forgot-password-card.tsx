@@ -3,17 +3,17 @@
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import Image from "next/image";
-import { LoginForm } from "./login-form";
-import { useLoginForm } from "../hooks/use-login-form";
-import { GoogleSignInButton } from "@/components/ui/google-sign-in-button";
+import { ForgotPasswordForm } from "./forgot-password-form";
+import { useForgotPasswordForm } from "../hooks/use-forgot-password-form";
 
-interface LoginCardProps {
+interface ForgotPasswordCardProps {
   locale: string;
 }
 
-export function LoginCard({ locale }: LoginCardProps) {
+export function ForgotPasswordCard({ locale }: ForgotPasswordCardProps) {
   const t = useTranslations("Auth");
-  const { handleLogin, isPending, error } = useLoginForm(locale);
+  const { handleRequest, isPending, error, successMessage } =
+    useForgotPasswordForm(locale);
 
   return (
     <div
@@ -35,9 +35,11 @@ export function LoginCard({ locale }: LoginCardProps) {
       {/* Heading */}
       <div className='mb-4 sm:mb-6 text-center'>
         <h1 className='text-lg sm:text-[22px] font-bold text-gray-900 leading-tight mb-1'>
-          {t("login_title")}
+          {t("forgot_password_title")}
         </h1>
-        <p className='text-sm text-gray-500'>{t("login_subtitle")}</p>
+        <p className='text-sm text-gray-500'>
+          {t("forgot_password_subtitle")}
+        </p>
       </div>
 
       {/* Error banner */}
@@ -47,32 +49,27 @@ export function LoginCard({ locale }: LoginCardProps) {
         </div>
       )}
 
-      {/* Google OAuth */}
-      <GoogleSignInButton locale={locale} />
-
-      {/* Divider */}
-      <div className='relative my-4 sm:my-5'>
-        <div className='absolute inset-0 flex items-center'>
-          <div className='w-full border-t border-gray-200' />
+      {/* Success banner */}
+      {successMessage && (
+        <div className='mb-3 sm:mb-4 px-4 py-2.5 sm:py-3 bg-green-50 border border-green-200 rounded-lg text-sm text-green-700 text-center'>
+          {successMessage}
         </div>
-        <div className='relative flex justify-center'>
-          <span className='bg-white px-3 text-xs text-gray-400'>
-            {t("or_continue_with_email")}
-          </span>
-        </div>
-      </div>
+      )}
 
       {/* Form */}
-      <LoginForm onSubmit={handleLogin} isPending={isPending} locale={locale} />
+      <ForgotPasswordForm
+        onSubmit={handleRequest}
+        isPending={isPending}
+        locale={locale}
+      />
 
-      {/* Register link */}
+      {/* Back to login link */}
       <p className='mt-4 sm:mt-5 text-center text-sm text-gray-500'>
-        {t("no_account")}{" "}
         <Link
-          href={`/${locale}/register`}
+          href={`/${locale}/login`}
           className='text-[#22c55e] font-medium hover:underline'
         >
-          {t("register")}
+          {t("back_to_login")}
         </Link>
       </p>
     </div>

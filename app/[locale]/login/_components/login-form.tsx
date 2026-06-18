@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
+import Link from "next/link";
 import { loginSchema, type LoginInput } from "../_utils/validation";
 
 interface LoginFormProps {
@@ -73,12 +74,20 @@ export function LoginForm({ onSubmit, isPending, locale }: LoginFormProps) {
 
       {/* Password */}
       <div className='space-y-1.5'>
-        <label
-          htmlFor='password'
-          className='block text-sm font-medium text-gray-700'
-        >
-          {t("password_label")}
-        </label>
+        <div className='flex items-center justify-between'>
+          <label
+            htmlFor='password'
+            className='block text-sm font-medium text-gray-700'
+          >
+            {t("password_label")}
+          </label>
+          <Link
+            href={`/${locale}/forgot-password`}
+            className='text-xs font-medium text-[#22c55e] hover:underline'
+          >
+            {t("forgot_password_link")}
+          </Link>
+        </div>
         <div className='relative'>
           <input
             id='password'
