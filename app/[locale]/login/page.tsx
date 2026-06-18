@@ -8,7 +8,7 @@ export default async function LoginPage({
   const { locale } = await params;
 
   return (
-    <div className='min-h-screen bg-[#f4f4f5] flex items-center justify-center p-4'>
+    <div className='h-[100dvh] overflow-hidden bg-white flex items-center justify-center p-4'>
       <LoginCard locale={locale} />
     </div>
   );

@@ -34,9 +34,20 @@
     "logout_button": "Sign Out",
     "status_pending": "Pending",
     "status_suspended": "Suspended",
+    "forgot_password_link": "Forgot password?",
+    "forgot_password_title": "Forgot Password",
+    "forgot_password_subtitle": "Enter your email and we'll send you a reset code",
+    "send_reset_code_button": "Send Reset Code",
+    "back_to_login": "Back to Login",
+    "reset_password_title": "Reset Password",
+    "new_password_label": "New Password",
+    "confirm_password_label": "Confirm Password",
+    "reset_password_button": "Reset Password",
     "success": {
       "code_sent": "Verification code sent to your email.",
-      "account_created": "Account setup complete!"
+      "account_created": "Account setup complete!",
+      "reset_code_sent": "If an account exists for this email, a reset code has been sent.",
+      "password_reset": "Your password has been reset. You can now sign in."
     },
     "errors": {
       "name_min": "Name must be at least 2 characters.",
@@ -49,7 +60,8 @@
       "password_required": "Password is required.",
       "email_taken": "An account with this email already exists.",
       "otp_invalid": "Invalid verification code.",
-      "otp_expired": "This code has expired. Please request a new one."
+      "otp_expired": "This code has expired. Please request a new one.",
+      "passwords_no_match": "Passwords do not match."
     }
   },
   "Dashboard": {

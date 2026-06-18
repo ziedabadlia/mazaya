@@ -34,9 +34,20 @@
     "logout_button": "تسجيل الخروج",
     "status_pending": "قيد المراجعة",
     "status_suspended": "موقوف",
+    "forgot_password_link": "نسيت كلمة المرور؟",
+    "forgot_password_title": "نسيت كلمة المرور",
+    "forgot_password_subtitle": "أدخل بريدك الإلكتروني وسنرسل لك رمز إعادة التعيين",
+    "send_reset_code_button": "إرسال رمز إعادة التعيين",
+    "back_to_login": "العودة لتسجيل الدخول",
+    "reset_password_title": "إعادة تعيين كلمة المرور",
+    "new_password_label": "كلمة المرور الجديدة",
+    "confirm_password_label": "تأكيد كلمة المرور",
+    "reset_password_button": "إعادة تعيين كلمة المرور",
     "success": {
       "code_sent": "تم إرسال رمز التحقق إلى بريدك الإلكتروني.",
-      "account_created": "تم إنشاء حسابك بنجاح!"
+      "account_created": "تم إنشاء حسابك بنجاح!",
+      "reset_code_sent": "إذا كان هناك حساب مرتبط بهذا البريد، فقد تم إرسال رمز إعادة التعيين إليه.",
+      "password_reset": "تمت إعادة تعيين كلمة المرور بنجاح. يمكنك الآن تسجيل الدخول."
     },
     "errors": {
       "name_min": "يجب أن يتكون الاسم من حرفين على الأقل.",
@@ -49,7 +60,8 @@
       "password_required": "كلمة المرور مطلوبة.",
       "email_taken": "يوجد حساب مسجل بهذا البريد الإلكتروني مسبقاً.",
       "otp_invalid": "رمز التحقق غير صحيح.",
-      "otp_expired": "انتهت صلاحية هذا الرمز. يرجى طلب رمز جديد."
+      "otp_expired": "انتهت صلاحية هذا الرمز. يرجى طلب رمز جديد.",
+      "passwords_no_match": "كلمتا المرور غير متطابقتين."
     }
   },
   "Dashboard": {
