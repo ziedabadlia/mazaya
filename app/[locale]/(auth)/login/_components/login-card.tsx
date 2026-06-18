@@ -2,10 +2,10 @@
 
 import { useTranslations } from "next-intl";
 import Link from "next/link";
-import Image from "next/image";
 import { LoginForm } from "./login-form";
 import { useLoginForm } from "../hooks/use-login-form";
 import { GoogleSignInButton } from "@/components/ui/google-sign-in-button";
+import { AuthCard } from "@/components/auth/auth-card";
 
 interface LoginCardProps {
   locale: string;
@@ -13,40 +13,15 @@ interface LoginCardProps {
 
 export function LoginCard({ locale }: LoginCardProps) {
   const t = useTranslations("Auth");
-  const { handleLogin, isPending, error } = useLoginForm(locale);
+  const { isPending, error, handleLogin } = useLoginForm(locale);
 
   return (
-    <div
-      className='w-full max-w-[400px] p-5 sm:p-6 md:p-10 max-h-full overflow-y-auto'
-      dir={locale === "ar" ? "rtl" : "ltr"}
+    <AuthCard
+      locale={locale}
+      title={t("login_title")}
+      subtitle={t("login_subtitle")}
+      error={error}
     >
-      {/* Logo */}
-      <div className='flex justify-center mb-4 sm:mb-6'>
-        <Image
-          src='/logo.svg'
-          alt='Mazaya'
-          width={72}
-          height={36}
-          className='object-contain w-16 sm:w-20 h-auto'
-          priority
-        />
-      </div>
-
-      {/* Heading */}
-      <div className='mb-4 sm:mb-6 text-center'>
-        <h1 className='text-lg sm:text-[22px] font-bold text-gray-900 leading-tight mb-1'>
-          {t("login_title")}
-        </h1>
-        <p className='text-sm text-gray-500'>{t("login_subtitle")}</p>
-      </div>
-
-      {/* Error banner */}
-      {error && (
-        <div className='mb-3 sm:mb-4 px-4 py-2.5 sm:py-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600 text-center'>
-          {error}
-        </div>
-      )}
-
       {/* Google OAuth */}
       <GoogleSignInButton locale={locale} />
 
@@ -75,6 +50,6 @@ export function LoginCard({ locale }: LoginCardProps) {
           {t("register")}
         </Link>
       </p>
-    </div>
+    </AuthCard>
   );
 }
