@@ -43,11 +43,13 @@
     "new_password_label": "New Password",
     "confirm_password_label": "Confirm Password",
     "reset_password_button": "Reset Password",
+    "request_new_link": "Request a new link",
     "success": {
       "code_sent": "Verification code sent to your email.",
       "account_created": "Account setup complete!",
       "reset_code_sent": "If an account exists for this email, a reset code has been sent.",
-      "password_reset": "Your password has been reset. You can now sign in."
+      "password_reset": "Your password has been reset. You can now sign in.",
+      "reset_link_sent": "If an account exists for this email, a password reset link has been sent."
     },
     "errors": {
       "name_min": "Name must be at least 2 characters.",
@@ -61,7 +63,9 @@
       "email_taken": "An account with this email already exists.",
       "otp_invalid": "Invalid verification code.",
       "otp_expired": "This code has expired. Please request a new one.",
-      "passwords_no_match": "Passwords do not match."
+      "passwords_no_match": "Passwords do not match.",
+      "reset_link_invalid": "This reset link is invalid.",
+      "reset_link_expired": "This reset link has expired. Please request a new one."
     }
   },
   "Dashboard": {
