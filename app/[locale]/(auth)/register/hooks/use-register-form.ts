@@ -48,7 +48,7 @@ export function useRegisterForm(locale: string) {
     formDataRef.current = formData;
 
     startTransition(async () => {
-      const result = await initiateRegistration(formData);
+      const result = await initiateRegistration(formData, locale);
 
       if (!result.success) {
         setError(resolveMessage(result.message));

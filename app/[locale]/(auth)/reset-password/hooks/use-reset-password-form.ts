@@ -1,16 +1,18 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { requestPasswordReset } from "../actions";
+import { resetPassword } from "../actions";
 
-interface ForgotPasswordFormState {
+interface ResetPasswordFormState {
   error: string | null;
   successMessage: string | null;
   isPending: boolean;
 }
 
-export function useForgotPasswordForm(locale: string) {
+export function useResetPasswordForm(locale: string, token: string) {
+  const router = useRouter();
   const t = useTranslations("Auth");
   const [isPending, startTransition] = useTransition();
 
@@ -25,7 +27,7 @@ export function useForgotPasswordForm(locale: string) {
     }
   };
 
-  const handleRequest = (data: Record<string, string>) => {
+  const handleReset = (data: Record<string, string>) => {
     setError(null);
     setSuccessMessage(null);
 
@@ -33,15 +35,15 @@ export function useForgotPasswordForm(locale: string) {
     Object.entries(data).forEach(([k, v]) => formData.append(k, v));
 
     startTransition(async () => {
-      const result = await requestPasswordReset(formData, locale);
+      const result = await resetPassword(token, formData);
 
       if (!result.success) {
         setError(resolveMessage(result.message));
         return;
       }
 
-      // Stay on this page — no redirect. Just show the confirmation banner.
       setSuccessMessage(resolveMessage(result.message));
+      router.push(`/${locale}/login`);
     });
   };
 
@@ -49,8 +51,8 @@ export function useForgotPasswordForm(locale: string) {
     error,
     successMessage,
     isPending,
-    handleRequest,
-  } satisfies ForgotPasswordFormState & {
-    handleRequest: (data: Record<string, string>) => void;
+    handleReset,
+  } satisfies ResetPasswordFormState & {
+    handleReset: (data: Record<string, string>) => void;
   };
 }
