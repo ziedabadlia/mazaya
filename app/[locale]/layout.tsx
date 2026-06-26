@@ -1,6 +1,7 @@
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
 import { Inter, IBM_Plex_Sans_Arabic } from "next/font/google";
+import { Providers } from "@/app/providers";
 import "@/app/globals.css";
 
 // Load fonts for both languages
@@ -29,7 +30,9 @@ export default async function RootLayout({
     <html lang={locale} dir={direction}>
       <body className={`${fontClass} font-sans bg-gray-50 text-gray-900 antialiased`}>
         <NextIntlClientProvider messages={messages}>
-          {children}
+          <Providers>
+            {children}
+          </Providers>
         </NextIntlClientProvider>
       </body>
     </html>

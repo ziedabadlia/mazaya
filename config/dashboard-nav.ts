@@ -73,10 +73,11 @@ export const dashboardNavItems: NavItem[] = [
     iconKey: "Settings",
     roles: ["OWNER"],
   },
+  // ── SUPER ADMIN ──
   {
-    translationKey: "Admin",
-    href: "/dashboard/admin/tenants",
-    iconKey: "Shield",
+    translationKey: "OwnerAccounts",
+    href: "/dashboard/admin/owner-accounts",
+    iconKey: "Users",
     roles: ["SUPER_ADMIN"],
   },
 ];

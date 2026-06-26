@@ -82,7 +82,7 @@
     "chart_placeholder": "سيتم عرض وحدة التحليلات هنا"
   },
   "Nav": {
-    "Admin": "لوحة الإدارة",
+    "OwnerAccounts": "حسابات الملاك",
     "Overview": "لوحة التحكم",
     "POS": "نقطة البيع",
     "Kitchen": "شاشة المطبخ",
@@ -90,6 +90,44 @@
     "Menu": "إدارة القائمة",
     "Staff": "إدارة الموظفين",
     "Settings": "الإعدادات",
-    "Logout": "تسجيل الخروج"
+    "Logout": "تسجيل الخروج",
+    "SuperAdmin": "المشرف العام"
+  },
+  "OwnerAccounts": {
+    "title": "حسابات الملاك",
+    "description": "إدارة ومتابعة جميع حسابات ملاك المطاعم على المنصة.",
+    "all": "الكل",
+    "pending": "قيد المراجعة",
+    "active": "نشط",
+    "suspended": "موقوف",
+    "search": "بحث بالاسم، البريد الإلكتروني، أو المطعم...",
+    "newest_first": "الأحدث أولاً",
+    "oldest_first": "الأقدم أولاً",
+    "date_type_submission": "تاريخ التقديم",
+    "date_type_approval": "تاريخ الموافقة",
+    "date_placeholder": "اختر نطاق تاريخ",
+    "date_clear": "مسح",
+    "date_hint_start": "اختر تاريخ البداية",
+    "date_hint_end": "اختر تاريخ النهاية",
+    "columns": {
+      "restaurant": "المطعم",
+      "owner": "المالك",
+      "email": "البريد الإلكتروني",
+      "status": "الحالة",
+      "submitted_at": "تاريخ التقديم",
+      "approved_at": "تاريخ الموافقة",
+      "actions": "إجراءات"
+    },
+    "empty": "لا توجد حسابات مطابقة للبحث أو الفلتر الحالي.",
+    "error": "حدث خطأ أثناء تحميل البيانات",
+    "retry": "إعادة المحاولة",
+    "activate_account": "تفعيل الحساب",
+    "suspend_account": "إيقاف الحساب",
+    "hard_delete": "حذف نهائي",
+    "confirm_delete_title": "تأكيد الحذف",
+    "confirm_delete_desc": "هل أنت متأكد من حذف حساب \"{name}\" نهائياً؟ هذا الإجراء لا يمكن التراجع عنه وسيحذف جميع بيانات المطعم.",
+    "cancel": "إلغاء",
+    "yes_delete": "نعم، احذف الحساب",
+    "pagination": "عرض {min} إلى {max} من أصل {total}"
   }
 }

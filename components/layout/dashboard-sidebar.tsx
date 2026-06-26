@@ -3,10 +3,11 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X, LogOut } from "lucide-react";
+import { Menu, X, LogOut, MoveRight } from "lucide-react";
 import { navIconMap, type NavItem } from "@/config/dashboard-nav";
 import { signOut } from "next-auth/react";
 import { useTranslations } from "next-intl";
+import { useLocale } from "next-intl";
 
 interface SidebarProps {
   items: NavItem[];
@@ -21,16 +22,17 @@ export function DashboardSidebar({ items, user }: SidebarProps) {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const t = useTranslations("Nav");
+  const locale = useLocale();
+  const isRtl = locale === "ar";
+
+  // Strip locale prefix for active matching
+  const pathnameWithoutLocale = pathname.replace(/^\/(ar|en)/, "");
 
   return (
     <>
-      {/* Mobile Header */}
+      {/* Mobile top bar */}
       <div className='flex items-center justify-between border-b border-border bg-surface-1 px-4 py-3 md:hidden'>
-        <img
-          src='/mazaya-logo.png'
-          alt='Mazaya'
-          className='h-8 w-8 object-contain'
-        />
+        <img src='/logo.svg' alt='Mazaya' className='h-8 w-8 object-contain' />
         <button
           onClick={() => setIsOpen(!isOpen)}
           className='text-txt-secondary hover:text-txt-primary transition-colors'
@@ -39,46 +41,77 @@ export function DashboardSidebar({ items, user }: SidebarProps) {
         </button>
       </div>
 
-      {/* Sidebar */}
+      {/* Sidebar panel
+       *
+       * FIX: mobile slide animation was using translate-x-full (physical right)
+       * which is wrong in LTR — sidebar should slide in from the left.
+       * Now uses logical inset-inline-start (start-0) and the translate
+       * is driven by a data attribute so we can target it with a CSS var.
+       *
+       * Approach: use translate-x-full to hide (off-screen to the right in RTL,
+       * to the left in LTR) — but since the sidebar is on the START side in both
+       * locales we need to push it off the START edge when closed:
+       *   RTL → sidebar is on the right → hide with -translate-x-full (move left, off screen)
+       *   LTR → sidebar is on the left  → hide with -translate-x-full (move left, off screen)
+       * So -translate-x-full is actually correct for LTR but WRONG for RTL (should be +translate-x-full).
+       * The cleanest solution: use `translate-x-full` when RTL (push to the right = off the right edge)
+       * and `-translate-x-full` when LTR (push to the left = off the left edge).
+       */}
       <aside
         className={`
-          fixed inset-y-0 start-0 z-50 flex w-64 flex-col border-e border-border bg-surface-1 transition-transform duration-300 ease-in-out md:static md:translate-x-0
-          ${isOpen ? "translate-x-0" : "translate-x-full md:translate-x-0"}
+          fixed inset-y-0 start-0 z-50 flex w-64 flex-col
+          border-e border-border bg-surface-1
+          transition-transform duration-300 ease-in-out
+          md:static md:translate-x-0
+          ${
+            isOpen
+              ? "translate-x-0"
+              : isRtl
+                ? "translate-x-full" // RTL closed: slide off to the right
+                : "-translate-x-full" // LTR closed: slide off to the left
+          }
         `}
       >
-        {/* Desktop Logo */}
-        <div className='flex items-center gap-3 border-b border-border px-5 py-5'>
+        {/* Logo + role */}
+        <div className='flex items-center gap-3 px-5 py-5'>
           <img
-            src='/mazaya-logo.png'
+            src='/logo.svg'
             alt='Mazaya'
-            className='h-10 w-10 object-contain'
+            className='h-9 w-9 object-contain'
           />
-          <span className='text-lg font-bold text-gold tracking-wide'>
-            مزايا
+          <span className='text-sm font-semibold text-txt-primary'>
+            {user.role === "SUPER_ADMIN" ? t("SuperAdmin") : user.name}
           </span>
         </div>
 
-        {/* Nav Links */}
-        <nav className='flex-1 space-y-1 overflow-y-auto p-3'>
+        {/* Nav links */}
+        <nav className='flex-1 space-y-0.5 overflow-y-auto px-3 py-2'>
+          <div className='px-2 pb-2 pt-1 text-xs font-medium text-txt-muted'>
+            {t("Overview")}
+          </div>
           {items.map((item) => {
             const isActive =
-              pathname === item.href || pathname.startsWith(`${item.href}/`);
-            const Icon = navIconMap[item.iconKey]; // <-- resolve here
+              pathnameWithoutLocale === item.href ||
+              pathnameWithoutLocale.startsWith(`${item.href}/`);
+            const Icon = navIconMap[item.iconKey];
 
             return (
               <Link
                 key={item.href}
-                href={item.href}
+                href={`/${locale}${item.href}`}
                 onClick={() => setIsOpen(false)}
-                className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all border
-        ${
-          isActive
-            ? "bg-gold/10 text-gold border-gold/20"
-            : "text-txt-secondary hover:bg-surface-2 hover:text-txt-primary border-transparent"
-        }`}
+                className={`
+                  flex items-center gap-3 px-3 py-2.5 text-sm font-medium
+                  transition-all rounded-xl
+                  ${
+                    isActive
+                      ? "bg-brand/10 text-brand font-semibold"
+                      : "text-txt-secondary hover:bg-surface-2/60 hover:text-txt-primary"
+                  }
+                `}
               >
                 <Icon
-                  className={`h-4 w-4 shrink-0 ${isActive ? "text-gold" : "text-txt-muted"}`}
+                  className={`h-[18px] w-[18px] shrink-0 ${isActive ? "text-brand" : "text-txt-muted"}`}
                 />
                 <span>{t(item.translationKey as any)}</span>
               </Link>
@@ -86,33 +119,20 @@ export function DashboardSidebar({ items, user }: SidebarProps) {
           })}
         </nav>
 
-        {/* User Footer */}
-        <div className='border-t border-border p-3 space-y-1'>
-          {/* User Info */}
-          <div className='flex items-center gap-3 rounded-lg px-3 py-2.5'>
-            <div className='flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gold/10 text-sm font-bold text-gold ring-1 ring-gold/20'>
-              {user.name?.charAt(0).toUpperCase() || "U"}
-            </div>
-            <div className='flex flex-col truncate'>
-              <span className='truncate text-sm font-medium text-txt-primary'>
-                {user.name}
-              </span>
-              <span className='text-xs text-txt-muted'>{user.role}</span>
-            </div>
-          </div>
-
-          {/* Logout */}
+        {/* Logout */}
+        <div className='px-3 pb-5 pt-2 border-t border-border'>
           <button
-            onClick={() => signOut({ callbackUrl: "/login" })}
-            className='flex w-full items-center gap-3 rounded-lg border border-transparent px-3 py-2.5 text-sm font-medium text-txt-secondary transition-all hover:border-status-danger/20 hover:bg-status-danger-bg hover:text-status-danger'
+            onClick={() => signOut({ callbackUrl: `/${locale}/login` })}
+            className='flex w-full items-center gap-3 px-3 py-2.5 text-sm font-semibold rounded-xl transition-colors hover:bg-red-50'
+            style={{ color: "#C1440E" }}
           >
-            <LogOut className='h-4 w-4 shrink-0' />
+            <LogOut className='h-[18px] w-[18px] shrink-0' />
             <span>{t("Logout")}</span>
           </button>
         </div>
       </aside>
 
-      {/* Mobile Overlay */}
+      {/* Mobile overlay */}
       {isOpen && (
         <div
           className='fixed inset-0 z-40 bg-black/40 backdrop-blur-sm md:hidden'
