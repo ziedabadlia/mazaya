@@ -12,6 +12,7 @@ export interface DateRangePickerProps {
   onDateFromChange: (v: string) => void;
   onDateToChange: (v: string) => void;
   onDateTypeChange: (v: string) => void;
+  onClear: () => void;
 }
 
 export function DateRangePicker({
@@ -21,6 +22,7 @@ export function DateRangePicker({
   onDateFromChange,
   onDateToChange,
   onDateTypeChange,
+  onClear,
 }: DateRangePickerProps) {
   const t = useTranslations("OwnerAccounts");
   const {
@@ -47,6 +49,7 @@ export function DateRangePicker({
     dateTo,
     onDateFromChange,
     onDateToChange,
+    onClear,
   });
 
   return (

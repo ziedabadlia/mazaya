@@ -15,10 +15,10 @@ interface OwnerAccountsTableProps {
   onRefetch: () => void;
 }
 
-const statusStyles = {
-  ACTIVE: "border-status-success/20 bg-status-success-bg text-status-success",
-  PENDING: "border-status-warning/20 bg-status-warning-bg text-status-warning",
-  SUSPENDED: "border-status-danger/20 bg-status-danger-bg text-status-danger",
+const STATUS_STYLE: Record<string, { bg: string; text: string; dot: string }> = {
+  ACTIVE: { bg: "bg-emerald-50", text: "text-emerald-700", dot: "bg-emerald-500" },
+  PENDING: { bg: "bg-amber-50", text: "text-amber-700", dot: "bg-amber-400" },
+  SUSPENDED: { bg: "bg-rose-50", text: "text-rose-700", dot: "bg-rose-500" },
 };
 
 const formatDate = (dateString: string | Date | null) => {
@@ -185,15 +185,15 @@ export function OwnerAccountsTable({
 
                     {/* Status */}
                     <td className='whitespace-nowrap px-4 py-4'>
-                      <span
-                        className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold ${
-                          statusStyles[
-                            tenant.status as keyof typeof statusStyles
-                          ] || ""
-                        }`}
-                      >
-                        {statusLabel}
-                      </span>
+                      {(() => {
+                        const style = STATUS_STYLE[tenant.status] || { bg: "", text: "", dot: "" };
+                        return (
+                          <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${style.bg} ${style.text}`}>
+                            <span className={`size-1.5 rounded-full flex-shrink-0 ${style.dot}`} />
+                            {statusLabel}
+                          </span>
+                        );
+                      })()}
                     </td>
 
                     {/* Submission date */}

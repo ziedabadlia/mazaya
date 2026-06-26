@@ -10,6 +10,7 @@ interface UseFilterBarProps {
   onSearchChange: (v: string) => void;
   onDateFromChange: (v: string) => void;
   onDateToChange: (v: string) => void;
+  onClearDates: () => void;
 }
 
 /** Manages search debounce, date buffering, picker visibility, and derived label for FilterBar. */
@@ -20,6 +21,7 @@ export function useFilterBar({
   onSearchChange,
   onDateFromChange,
   onDateToChange,
+  onClearDates,
 }: UseFilterBarProps) {
   const locale = useLocale();
   const t = useTranslations("OwnerAccounts");
@@ -70,12 +72,11 @@ export function useFilterBar({
     }
   };
 
-  const handleClearDate = (e: React.MouseEvent) => {
-    e.stopPropagation();
+  const handleClearDate = (e?: React.MouseEvent) => {
+    e?.stopPropagation();
     setLocalDateFrom("");
     setLocalDateTo("");
-    onDateFromChange("");
-    onDateToChange("");
+    onClearDates();
   };
 
   const hasDate = Boolean(localDateFrom || localDateTo);

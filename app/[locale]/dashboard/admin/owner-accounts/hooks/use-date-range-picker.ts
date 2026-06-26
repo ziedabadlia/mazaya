@@ -15,6 +15,7 @@ interface UseDateRangePickerProps {
   dateTo: string;
   onDateFromChange: (v: string) => void;
   onDateToChange: (v: string) => void;
+  onClear: () => void;
 }
 
 /** Encapsulates all calendar state and interaction logic for DateRangePicker. */
@@ -23,6 +24,7 @@ export function useDateRangePicker({
   dateTo,
   onDateFromChange,
   onDateToChange,
+  onClear,
 }: UseDateRangePickerProps) {
   const locale = useLocale();
   const isRtl = locale === "ar";
@@ -76,8 +78,7 @@ export function useDateRangePicker({
   };
 
   const handleClear = () => {
-    onDateFromChange("");
-    onDateToChange("");
+    onClear();
     setHoverDate(null);
   };
 

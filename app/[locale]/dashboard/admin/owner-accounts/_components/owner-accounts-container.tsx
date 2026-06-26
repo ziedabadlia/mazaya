@@ -72,6 +72,7 @@ export function OwnerAccountsContainer() {
   const handleSortChange = useCallback((val: string) => setParams({ sort: val, page: "1" }), [setParams]);
   const handleDateFromChange = useCallback((val: string) => setParams({ dateFrom: val, page: "1" }), [setParams]);
   const handleDateToChange = useCallback((val: string) => setParams({ dateTo: val, page: "1" }), [setParams]);
+  const handleClearDates = useCallback(() => setParams({ dateFrom: "", dateTo: "", page: "1" }), [setParams]);
   const handleDateTypeChange = useCallback((val: string) => setParams({ dateType: val, page: "1" }), [setParams]);
   const handlePageChange = useCallback((val: number) => setParams({ page: val.toString() }), [setParams]);
 
@@ -159,6 +160,7 @@ export function OwnerAccountsContainer() {
         onDateFromChange={handleDateFromChange}
         dateTo={dateTo}
         onDateToChange={handleDateToChange}
+        onClearDates={handleClearDates}
         dateType={dateType}
         onDateTypeChange={handleDateTypeChange}
       />

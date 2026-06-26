@@ -29,48 +29,28 @@ interface StatusTabsProps {
  */
 const TAB_CONFIG = {
   ALL: {
-    active: {
-      container: "bg-gray-800 text-white border-gray-800 dark:bg-gray-700 dark:border-gray-700",
-      badge: "bg-white/20 text-white",
-    },
-    inactive: {
-      container: "bg-surface-1 text-txt-secondary border-border hover:border-gray-400 hover:text-gray-700 dark:hover:border-gray-500 dark:hover:text-gray-300",
-      badge: "bg-surface-3 text-txt-muted",
-    },
-    dot: null,
+    chip: "bg-surface-1 border-border text-txt-secondary hover:border-brand/30 hover:bg-brand/5",
+    badge: "bg-surface-3 text-txt-muted",
+    activeChip: "bg-brand border-brand text-white shadow-sm",
+    activeBadge: "bg-white/25 text-white",
   },
   PENDING: {
-    active: {
-      container: "bg-amber-400 text-white border-amber-400 dark:bg-amber-500 dark:border-amber-500",
-      badge: "bg-white/25 text-amber-800",
-    },
-    inactive: {
-      container: "bg-surface-1 text-txt-secondary border-border hover:border-amber-300 hover:text-amber-600 dark:hover:border-amber-700 dark:hover:text-amber-400",
-      badge: "bg-surface-3 text-txt-muted",
-    },
-    dot: null,
+    chip: "bg-amber-50 border-amber-200 text-amber-800 hover:bg-amber-100 hover:border-amber-300",
+    badge: "bg-amber-200 text-amber-800 font-bold",
+    activeChip: "bg-amber-500 border-amber-500 text-white shadow-sm shadow-amber-200",
+    activeBadge: "bg-white/25 text-white",
   },
   ACTIVE: {
-    active: {
-      container: "bg-emerald-500 text-white border-emerald-500 dark:bg-emerald-600 dark:border-emerald-600",
-      badge: "bg-white/25 text-emerald-800",
-    },
-    inactive: {
-      container: "bg-surface-1 text-txt-secondary border-border hover:border-emerald-300 hover:text-emerald-600 dark:hover:border-emerald-700 dark:hover:text-emerald-400",
-      badge: "bg-surface-3 text-txt-muted",
-    },
-    dot: null,
+    chip: "bg-emerald-50 border-emerald-200 text-emerald-800 hover:bg-emerald-100 hover:border-emerald-300",
+    badge: "bg-emerald-200 text-emerald-800 font-bold",
+    activeChip: "bg-emerald-600 border-emerald-600 text-white shadow-sm shadow-emerald-200",
+    activeBadge: "bg-white/25 text-white",
   },
   SUSPENDED: {
-    active: {
-      container: "bg-rose-500 text-white border-rose-500 dark:bg-rose-600 dark:border-rose-600",
-      badge: "bg-white/25 text-rose-800",
-    },
-    inactive: {
-      container: "bg-surface-1 text-txt-secondary border-border hover:border-rose-300 hover:text-rose-500 dark:hover:border-rose-700 dark:hover:text-rose-400",
-      badge: "bg-surface-3 text-txt-muted",
-    },
-    dot: null,
+    chip: "bg-rose-50 border-rose-200 text-rose-800 hover:bg-rose-100 hover:border-rose-300",
+    badge: "bg-rose-200 text-rose-800 font-bold",
+    activeChip: "bg-rose-600 border-rose-600 text-white shadow-sm shadow-rose-200",
+    activeBadge: "bg-white/25 text-white",
   },
 } as const;
 
@@ -111,22 +91,17 @@ export function StatusTabs({
       {tabs.map((tab) => {
         const config = TAB_CONFIG[tab.id];
         const isActive = optimisticStatus === tab.id;
-        const containerCls = isActive
-          ? config.active.container
-          : config.inactive.container;
-        const badgeCls = isActive
-          ? config.active.badge
-          : config.inactive.badge;
+        const chipCls = isActive ? config.activeChip : config.chip;
+        const badgeCls = isActive ? config.activeBadge : config.badge;
 
         return (
           <button
             key={tab.id}
             onClick={() => handleClick(tab.id)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold border transition-all cursor-pointer ${containerCls}`}
+            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full text-sm font-medium border transition-all duration-150 cursor-pointer ${chipCls}`}
           >
             <span>{tab.label}</span>
             {isLoading ? (
-              /* Skeleton badge — same size as the real badge, no content */
               <span
                 className={`min-w-[1.5rem] h-5 rounded-full animate-pulse ${
                   isActive ? "bg-white/30" : "bg-surface-3"
@@ -134,7 +109,7 @@ export function StatusTabs({
               />
             ) : (
               <span
-                className={`min-w-[1.375rem] px-1.5 py-0.5 rounded-full text-xs font-semibold text-center ${badgeCls}`}
+                className={`text-xs px-1.5 py-0.5 rounded-full min-w-[1.5rem] text-center ${badgeCls}`}
               >
                 {tab.count}
               </span>

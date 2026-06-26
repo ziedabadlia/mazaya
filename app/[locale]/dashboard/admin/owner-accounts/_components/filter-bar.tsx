@@ -14,6 +14,7 @@ interface FilterBarProps {
   onDateFromChange: (value: string) => void;
   dateTo: string;
   onDateToChange: (value: string) => void;
+  onClearDates: () => void;
   dateType: string;
   onDateTypeChange: (value: string) => void;
 }
@@ -27,6 +28,7 @@ export function FilterBar({
   onDateFromChange,
   dateTo,
   onDateToChange,
+  onClearDates,
   dateType,
   onDateTypeChange,
 }: FilterBarProps) {
@@ -51,6 +53,7 @@ export function FilterBar({
     onSearchChange,
     onDateFromChange,
     onDateToChange,
+    onClearDates,
   });
 
   return (
@@ -104,6 +107,7 @@ export function FilterBar({
                 onDateFromChange={handleLocalDateFromChange}
                 onDateToChange={handleLocalDateToChange}
                 onDateTypeChange={onDateTypeChange}
+                onClear={handleClearDate}
               />
             </div>
           )}
