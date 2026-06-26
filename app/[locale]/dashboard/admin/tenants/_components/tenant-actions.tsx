@@ -1,7 +1,7 @@
 "use client";
 
 import { useTransition } from "react";
-import { activateTenant, suspendTenant } from "../actions";
+import { updateTenantStatus } from "../actions";
 import { Loader2 } from "lucide-react";
 
 interface TenantActionsProps {
@@ -13,11 +13,11 @@ export function TenantActions({ tenantId, currentStatus }: TenantActionsProps) {
   const [isPending, startTransition] = useTransition();
 
   const handleActivate = () => {
-    startTransition(() => activateTenant(tenantId));
+    startTransition(() => updateTenantStatus(tenantId, "ACTIVE"));
   };
 
   const handleSuspend = () => {
-    startTransition(() => suspendTenant(tenantId));
+    startTransition(() => updateTenantStatus(tenantId, "SUSPENDED"));
   };
 
   return (
