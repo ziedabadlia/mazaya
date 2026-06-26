@@ -27,7 +27,8 @@ export function useLanguageSwitcher(): UseLanguageSwitcherReturn {
       // e.g. /ar/login → /en/login
       const segments = pathname.split("/");
       segments[1] = nextLocale;
-      router.push(segments.join("/"));
+      // Use window.location.href to ensure the browser completely reloads the DOM and dir properties
+      window.location.href = segments.join("/");
     });
   };
 

@@ -91,6 +91,16 @@ app/
       layout.tsx
     dashboard/
       admin/
+        owner-accounts/
+          _components/
+            filter-bar.tsx
+            owner-accounts-container.tsx
+            owner-accounts-table.tsx
+            pagination.tsx
+            row-actions-menu.tsx
+            status-tabs.tsx
+          actions.ts
+          page.tsx
         tenants/
           _components/
             tenant-actions.tsx
@@ -102,6 +112,8 @@ app/
     layout.tsx
   api/
     admin/
+      owner-accounts/
+        route.ts
       tenants/
         route.ts
     auth/
@@ -109,6 +121,7 @@ app/
         route.ts
   favicon.ico
   globals.css
+  providers.tsx
 auth/
   actions.ts
   config.ts
@@ -118,6 +131,7 @@ components/
   auth/
     auth-card.tsx
   layout/
+    dashboard-header.tsx
     dashboard-sidebar.tsx
   providers/
     query-provider.tsx
@@ -147,6 +161,8 @@ prisma/
     20260613182958_add_tenant_status_and_super_admin/
       migration.sql
     20260617213632_add_oauth_accounts_sessions/
+      migration.sql
+    20260625231211_add_approved_at/
       migration.sql
     migration_lock.toml
   schema.prisma
@@ -181,103 +197,328 @@ vercel.json
 <files>
 This section contains the contents of the repository's files.
 
-<file path="app/[locale]/(auth)/reset-password/_components/reset-password-card.tsx">
+<file path="app/[locale]/dashboard/admin/owner-accounts/_components/filter-bar.tsx">
+import { Search, Calendar, ArrowUpDown, ChevronDown } from "lucide-react";
+import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
-import Link from "next/link";
-import { ResetPasswordForm } from "./reset-password-form";
-import { useResetPasswordForm } from "../hooks/use-reset-password-form";
-import { AuthCard } from "@/components/auth/auth-card";
 ⋮----
-interface ResetPasswordCardProps {
-  locale: string;
-  token: string | null;
+interface FilterBarProps {
+  search: string;
+  onSearchChange: (value: string) => void;
+  sort: string;
+  onSortChange: (value: string) => void;
+  dateFrom: string;
+  onDateFromChange: (value: string) => void;
+  dateTo: string;
+  onDateToChange: (value: string) => void;
 }
 ⋮----
-// No token in the URL at all — nothing to recover, send the user back.
+// Sync local state back when parent resets search (e.g. on tab change)
+⋮----
+// Debounce search
+⋮----
+{/* Search input
+       *
+       * FIX: was using physical padding (pr-10 pl-4) and physical icon
+       * position (right-3). Replaced with logical equivalents:
+       *   ps- = padding-inline-start  (left in LTR, right in RTL)
+       *   pe- = padding-inline-end    (right in LTR, left in RTL)
+       *   end-3 = inset-inline-end    (right in LTR, left in RTL)
+       *
+       * The search icon sits at the END of the input (right in RTL, left
+       * in LTR) — matching typical search field conventions per locale.
+       */}
+⋮----
+{/* Date range + Sort */}
+⋮----
+{/* Date range — date inputs are always LTR internally so we force
+            dir="ltr" on the wrapper to prevent the browser from mirroring
+            the date picker UI in RTL mode */}
+⋮----
+onChange=
+⋮----
+{/* Sort select
+         *
+         * FIX: icon positions were physical (right-3, left-3).
+         * The ArrowUpDown icon goes at the START of the pill (where the
+         * sort meaning is) and ChevronDown at the END (indicates dropdown).
+         * Used logical ps-/pe- padding and start-/end- positioning.
+         */}
 </file>
 
-<file path="app/[locale]/(auth)/reset-password/_components/reset-password-form.tsx">
-import { useTranslations } from "next-intl";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2, Eye, EyeOff } from "lucide-react";
-import { useState } from "react";
-import {
-  resetPasswordSchema,
-  type ResetPasswordInput,
-} from "../_utils/validation";
+<file path="app/[locale]/dashboard/admin/owner-accounts/_components/owner-accounts-container.tsx">
+import { useCallback } from "react";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
+import { useQuery } from "@tanstack/react-query";
+import { StatusTabs } from "./status-tabs";
+import { FilterBar } from "./filter-bar";
+import { OwnerAccountsTable } from "./owner-accounts-table";
 ⋮----
-interface ResetPasswordFormProps {
-  onSubmit: (data: Record<string, string>) => void;
-  isPending: boolean;
-  locale: string;
+interface ActionCounts {
+  ALL: number;
+  PENDING: number;
+  ACTIVE: number;
+  SUSPENDED: number;
 }
-⋮----
-const translateError = (message?: string) =>
-⋮----
-const onValid = (data: ResetPasswordInput) =>
-⋮----
-<form onSubmit=
-{/* New Password */}
-⋮----
-{/* Confirm Password */}
-</file>
-
-<file path="app/[locale]/(auth)/reset-password/_utils/validation.ts">
-import { z } from "zod";
-⋮----
-export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
-</file>
-
-<file path="app/[locale]/(auth)/reset-password/hooks/use-reset-password-form.ts">
-import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
-import { resetPassword } from "../actions";
-⋮----
-interface ResetPasswordFormState {
-  error: string | null;
-  successMessage: string | null;
-  isPending: boolean;
-}
-⋮----
-export function useResetPasswordForm(locale: string, token: string)
-⋮----
-const resolveMessage = (key: string): string =>
-⋮----
-const handleReset = (data: Record<string, string>) =>
-</file>
-
-<file path="app/[locale]/(auth)/reset-password/actions.ts">
-import { db } from "@/lib/db";
-import bcrypt from "bcrypt";
-import { resetPasswordSchema } from "./_utils/validation";
-⋮----
-export type ActionResult =
-  | { success: true; message: string }
-  | { success: false; message: string };
 ⋮----
 /**
- * Validates the reset token and overwrites the user's password.
- * Token lookup, expiry check, and password update all happen inside
- * one transaction so a token can never be partially consumed or reused.
+ * All filter state lives in the URL search params so the view is fully
+ * shareable and survives hard reloads. The component reads from the URL
+ * on mount and writes back to it on every filter change using
+ * router.replace (no history entry — feels like in-place state).
+ *
+ * Params:
+ *   status   — ALL | PENDING | ACTIVE | SUSPENDED   (default: ALL)
+ *   search   — free-text query                       (default: "")
+ *   sort     — asc | desc                            (default: desc)
+ *   dateFrom — YYYY-MM-DD                            (default: "")
+ *   dateTo   — YYYY-MM-DD                            (default: "")
+ *   page     — integer ≥ 1                           (default: 1)
  */
-export async function resetPassword(
-  token: string,
-  formData: FormData,
-): Promise<ActionResult>
+export function OwnerAccountsContainer()
+⋮----
+// ── Read state from URL ──────────────────────────────────────────────
+⋮----
+// ── Write state to URL ───────────────────────────────────────────────
+// Merges a partial update into the current params and navigates.
+// Uses router.replace so the browser Back button is not polluted with
+// every keystroke — the user still gets one entry per "session" of
+// visiting this page.
+⋮----
+// Remove defaults to keep the URL clean
+⋮----
+// ── Handlers ─────────────────────────────────────────────────────────
+const handleStatusChange = (val: string)
+⋮----
+const handleSearchChange = (val: string)
+⋮----
+const handleSortChange = (val: string) => setParams(
+⋮----
+const handleDateFromChange = (val: string)
+⋮----
+const handleDateToChange = (val: string)
+⋮----
+const handlePageChange = (val: number) => setParams(
+⋮----
+// ── Data fetching ────────────────────────────────────────────────────
+// queryKey mirrors the URL params so TanStack Query automatically
+// re-fetches whenever the URL changes.
 </file>
 
-<file path="app/[locale]/(auth)/reset-password/page.tsx">
-import { ResetPasswordCard } from "./_components/reset-password-card";
+<file path="app/[locale]/dashboard/admin/owner-accounts/_components/owner-accounts-table.tsx">
+import { useTranslations } from "next-intl";
+import { Pagination } from "./pagination";
+import { RowActionsMenu } from "./row-actions-menu";
 ⋮----
-export default async function ResetPasswordPage({
-  params,
-  searchParams,
-}: {
-  params: Promise<{ locale: string }>;
-  searchParams: Promise<{ token?: string }>;
-})
+interface OwnerAccountsTableProps {
+  data: any[];
+  isLoading: boolean;
+  isError: boolean;
+  total: number;
+  page: number;
+  limit: number;
+  onPageChange: (page: number) => void;
+  onRefetch: () => void;
+}
+⋮----
+const formatDate = (dateString: string | Date | null) =>
+⋮----
+{/*
+         * FIX: was using text-start / text-end on individual cells which
+         * are already logical and correct. The real issue was the table
+         * itself had no explicit direction — it inherits dir from the
+         * nearest ancestor, which was the layout's hardcoded dir="rtl".
+         * Now that we removed the hardcoded dir from the layout, the table
+         * correctly inherits from <html dir>.
+         *
+         * Also fixed: skeleton loader used ml-auto (physical). Replaced
+         * with ms-auto (logical margin-inline-start: auto).
+         */}
+⋮----
+
+⋮----
+{/* FIX: was ml-auto (physical), now ms-auto (logical) */}
+⋮----
+{/* Restaurant */}
+⋮----
+{/* Owner */}
+⋮----
+{/* Email — force ltr so email addresses never get reversed */}
+⋮----
+{/* Status */}
+⋮----
+{/* Submission date — dates are always ltr */}
+⋮----
+{/* Approval date */}
+⋮----
+{/* Actions */}
+</file>
+
+<file path="app/[locale]/dashboard/admin/owner-accounts/_components/pagination.tsx">
+import { ChevronRight, ChevronLeft } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useLocale } from "next-intl";
+⋮----
+interface PaginationProps {
+  page: number;
+  total: number;
+  limit: number;
+  onChange: (page: number) => void;
+}
+⋮----
+export function Pagination(
+⋮----
+const renderPages = () =>
+⋮----
+/*
+   * FIX: chevron directions were hardcoded for RTL only.
+   * In RTL:  ChevronRight = "previous", ChevronLeft = "next"  (reading flows right-to-left)
+   * In LTR:  ChevronLeft  = "previous", ChevronRight = "next" (reading flows left-to-right)
+   *
+   * Also fixed: pagination text was hardcoded Arabic. Now uses i18n.
+   */
+⋮----
+{/* Previous */}
+⋮----
+onClick=
+⋮----
+{/* Next */}
+</file>
+
+<file path="app/[locale]/dashboard/admin/owner-accounts/_components/row-actions-menu.tsx">
+import { MoreVertical, CheckCircle2, XCircle, Trash2 } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
+import { useTranslations } from "next-intl";
+import { updateTenantStatus, deleteTenant } from "../actions";
+⋮----
+interface DropdownPos {
+  top: number;
+  right: number; // distance from the RIGHT edge of the viewport
+}
+⋮----
+right: number; // distance from the RIGHT edge of the viewport
+⋮----
+// Anchor to the RIGHT edge of the button, expressed as distance
+// from the right side of the viewport. This works correctly in
+// both RTL (button is on the left, menu opens rightward from it)
+// and LTR layouts.
+⋮----
+// Close on scroll so the menu doesn't float away
+⋮----
+const close = ()
+⋮----
+const handleStatusChange = async (newStatus: string) =>
+⋮----
+const handleDelete = async () =>
+⋮----
+{/* Invisible backdrop */}
+⋮----
+{/*
+           * Uses `right` (not `left`) so the menu's right edge aligns with
+           * the button's right edge in both RTL and LTR layouts.
+           * No transform needed — `right` positioning does the job cleanly.
+           */}
+⋮----
+onClick=
+⋮----
+setIsOpen(false);
+setShowDeleteModal(true);
+⋮----
+{/* Delete confirmation modal */}
+</file>
+
+<file path="app/[locale]/dashboard/admin/owner-accounts/_components/status-tabs.tsx">
+import { useTranslations } from "next-intl";
+⋮----
+interface StatusTabsProps {
+  currentStatus: string;
+  onChange: (status: string) => void;
+  counts: {
+    ALL: number;
+    PENDING: number;
+    ACTIVE: number;
+    SUSPENDED: number;
+  };
+}
+⋮----
+// FIX: use i18n translations instead of hardcoded Arabic strings
+</file>
+
+<file path="app/[locale]/dashboard/admin/owner-accounts/actions.ts">
+import { db } from "@/lib/db";
+import { auth } from "@/auth/index";
+⋮----
+async function guardSuperAdmin()
+⋮----
+export async function updateTenantStatus(tenantId: string, status: "ACTIVE" | "SUSPENDED" | "PENDING")
+⋮----
+// If activating, set approvedAt if not already set
+⋮----
+export async function deleteTenant(tenantId: string)
+⋮----
+// Get all users associated with this tenant
+⋮----
+// Hard delete users first if they only belong to this tenant (cascade fallback)
+⋮----
+// Delete the tenant itself
+</file>
+
+<file path="app/[locale]/dashboard/admin/owner-accounts/page.tsx">
+import { Suspense } from "react";
+import { auth } from "@/auth/index";
+import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
+import { OwnerAccountsContainer } from "./_components/owner-accounts-container";
+⋮----
+{/*
+       * useSearchParams() inside OwnerAccountsContainer requires the
+       * component tree to be wrapped in <Suspense>. Without this Next.js
+       * throws at build time in production. The fallback keeps the layout
+       * stable while the client bundle hydrates.
+       */}
+</file>
+
+<file path="app/api/admin/owner-accounts/route.ts">
+import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@/auth/index";
+import { db } from "@/lib/db";
+⋮----
+export async function GET(req: NextRequest)
+⋮----
+const sort = searchParams.get("sort") || "desc"; // desc = newest first
+⋮----
+slug: { not: "mazaya-system" }, // exclude super admin
+</file>
+
+<file path="app/providers.tsx">
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { useState } from "react";
+⋮----
+export function Providers(
+</file>
+
+<file path="components/layout/dashboard-header.tsx">
+import { usePathname } from "next/navigation";
+import { LanguageSwitcher } from "@/components/ui/language-switcher";
+import { Bell } from "lucide-react";
+import { dashboardNavItems } from "@/config/dashboard-nav";
+import { useTranslations } from "next-intl";
+⋮----
+export function DashboardHeader()
+⋮----
+// Strip the locale prefix (e.g. /ar/dashboard/... → /dashboard/...)
+// so href comparisons in dashboardNavItems work regardless of active locale.
+⋮----
+// Find the best-matching nav item (longest href match wins for nested routes)
+⋮----
+// FIX: use the translationKey directly — "OwnerAccounts" is in the Nav namespace.
+// No special-casing needed any more.
+</file>
+
+<file path="prisma/migrations/20260625231211_add_approved_at/migration.sql">
+-- AlterTable
+ALTER TABLE "tenants" ADD COLUMN     "approved_at" TIMESTAMP(3);
 </file>
 
 <file path="app/[locale]/(auth)/forgot-password/_components/forgot-password-card.tsx">
@@ -331,43 +572,6 @@ import { z } from "zod";
  */
 ⋮----
 export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;
-</file>
-
-<file path="app/[locale]/(auth)/forgot-password/hooks/use-forgot-password-form.ts">
-import { useState, useTransition } from "react";
-import { useTranslations } from "next-intl";
-import { requestPasswordReset } from "../actions";
-⋮----
-interface ForgotPasswordFormState {
-  error: string | null;
-  successMessage: string | null;
-  isPending: boolean;
-}
-⋮----
-export function useForgotPasswordForm(locale: string)
-⋮----
-const resolveMessage = (key: string): string =>
-⋮----
-const handleRequest = (data: Record<string, string>) =>
-⋮----
-// Stay on this page — no redirect. Just show the confirmation banner.
-</file>
-
-<file path="app/[locale]/(auth)/forgot-password/actions.ts">
-import { db } from "@/lib/db";
-import crypto from "crypto";
-import { generateSecureToken } from "@/lib/utils";
-import { forgotPasswordSchema } from "./_utils/validation";
-import { sendPasswordResetEmail } from "@/lib/mail";
-⋮----
-export type ActionResult =
-  | { success: true; message: string }
-  | { success: false; message: string };
-⋮----
-export async function requestPasswordReset(
-  formData: FormData,
-  locale: string,
-): Promise<ActionResult>
 </file>
 
 <file path="app/[locale]/(auth)/forgot-password/page.tsx">
@@ -565,65 +769,6 @@ export type RegistrationInfoInput = z.infer<typeof registrationInfoSchema>;
 export type OtpInput = z.infer<typeof otpSchema>;
 </file>
 
-<file path="app/[locale]/(auth)/register/hooks/use-register-form.ts">
-import { useState, useTransition, useRef } from "react";
-import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
-import { initiateRegistration, confirmRegistration } from "../actions";
-⋮----
-export type RegisterStep = "INFO" | "OTP";
-⋮----
-interface RegisterFormState {
-  step: RegisterStep;
-  email: string;
-  error: string | null;
-  successMessage: string | null;
-  isPending: boolean;
-}
-⋮----
-export function useRegisterForm(locale: string)
-⋮----
-// Hold the original FormData across steps for re-validation in stage 2
-⋮----
-const resolveMessage = (key: string): string =>
-⋮----
-/**
-   * Phase 1 — Validate info, send OTP, advance to OTP step.
-   */
-const handleInitiate = (data: Record<string, string>) =>
-⋮----
-/**
-   * Phase 2 — Verify OTP, create account, redirect to waiting room.
-   */
-const handleVerify = (otpCode: string) =>
-⋮----
-const goBack = () =>
-</file>
-
-<file path="app/[locale]/(auth)/register/actions.ts">
-import { db } from "@/lib/db";
-import crypto from "crypto";
-import bcrypt from "bcrypt";
-import { slugify, generateVerificationCode } from "@/lib/utils";
-import { registrationInfoSchema, otpSchema } from "./_utils/validation";
-import { sendVerificationEmail } from "@/lib/mail";
-⋮----
-export type ActionResult =
-  | { success: true; message: string }
-  | { success: false; message: string };
-⋮----
-export async function initiateRegistration(
-  formData: FormData,
-  locale: string,
-): Promise<ActionResult>
-⋮----
-export async function confirmRegistration(
-  email: string,
-  otpCode: string,
-  rawFormData: FormData,
-): Promise<ActionResult>
-</file>
-
 <file path="app/[locale]/(auth)/register/page.tsx">
 import { RegisterCard } from "./_components/register-card";
 ⋮----
@@ -631,6 +776,105 @@ export default async function RegisterPage({
   params,
 }: {
   params: Promise<{ locale: string }>;
+})
+</file>
+
+<file path="app/[locale]/(auth)/reset-password/_components/reset-password-card.tsx">
+import { useTranslations } from "next-intl";
+import Link from "next/link";
+import { ResetPasswordForm } from "./reset-password-form";
+import { useResetPasswordForm } from "../hooks/use-reset-password-form";
+import { AuthCard } from "@/components/auth/auth-card";
+⋮----
+interface ResetPasswordCardProps {
+  locale: string;
+  token: string | null;
+}
+⋮----
+// No token in the URL at all — nothing to recover, send the user back.
+</file>
+
+<file path="app/[locale]/(auth)/reset-password/_components/reset-password-form.tsx">
+import { useTranslations } from "next-intl";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader2, Eye, EyeOff } from "lucide-react";
+import { useState } from "react";
+import {
+  resetPasswordSchema,
+  type ResetPasswordInput,
+} from "../_utils/validation";
+⋮----
+interface ResetPasswordFormProps {
+  onSubmit: (data: Record<string, string>) => void;
+  isPending: boolean;
+  locale: string;
+}
+⋮----
+const translateError = (message?: string) =>
+⋮----
+const onValid = (data: ResetPasswordInput) =>
+⋮----
+<form onSubmit=
+{/* New Password */}
+⋮----
+{/* Confirm Password */}
+</file>
+
+<file path="app/[locale]/(auth)/reset-password/_utils/validation.ts">
+import { z } from "zod";
+⋮----
+export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
+</file>
+
+<file path="app/[locale]/(auth)/reset-password/hooks/use-reset-password-form.ts">
+import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { resetPassword } from "../actions";
+⋮----
+interface ResetPasswordFormState {
+  error: string | null;
+  successMessage: string | null;
+  isPending: boolean;
+}
+⋮----
+export function useResetPasswordForm(locale: string, token: string)
+⋮----
+const resolveMessage = (key: string): string =>
+⋮----
+const handleReset = (data: Record<string, string>) =>
+</file>
+
+<file path="app/[locale]/(auth)/reset-password/actions.ts">
+import { db } from "@/lib/db";
+import bcrypt from "bcrypt";
+import { resetPasswordSchema } from "./_utils/validation";
+⋮----
+export type ActionResult =
+  | { success: true; message: string }
+  | { success: false; message: string };
+⋮----
+/**
+ * Validates the reset token and overwrites the user's password.
+ * Token lookup, expiry check, and password update all happen inside
+ * one transaction so a token can never be partially consumed or reused.
+ */
+export async function resetPassword(
+  token: string,
+  formData: FormData,
+): Promise<ActionResult>
+</file>
+
+<file path="app/[locale]/(auth)/reset-password/page.tsx">
+import { ResetPasswordCard } from "./_components/reset-password-card";
+⋮----
+export default async function ResetPasswordPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ locale: string }>;
+  searchParams: Promise<{ token?: string }>;
 })
 </file>
 
@@ -710,14 +954,29 @@ interface TenantTableProps {
 
 <file path="app/[locale]/dashboard/admin/tenants/actions.ts">
 import { db } from "@/lib/db";
-import { revalidatePath } from "next/cache";
 import { auth } from "@/auth/index";
+import { revalidatePath } from "next/cache";
 ⋮----
 async function guardSuperAdmin()
 ⋮----
-export async function activateTenant(tenantId: string)
+export async function updateTenantStatus(
+  tenantId: string,
+  status: "ACTIVE" | "SUSPENDED" | "PENDING",
+)
 ⋮----
-export async function suspendTenant(tenantId: string)
+// Set approvedAt the first time a tenant is activated
+⋮----
+// FIX: revalidate the admin page so RSC cache is busted after mutations
+⋮----
+export async function deleteTenant(tenantId: string)
+⋮----
+/*
+   * FIX: The Prisma schema has `onDelete: Cascade` on all relations that
+   * descend from Tenant (users, branches, categories, orders, etc.).
+   * Manually deleting users first before deleting the tenant was causing
+   * double-delete errors because Prisma's cascade would try to delete them
+   * again. A single `db.tenant.delete` is sufficient and correct.
+   */
 </file>
 
 <file path="app/api/admin/tenants/route.ts">
@@ -888,52 +1147,8 @@ const switchLocale = (nextLocale: SupportedLocale) =>
 ⋮----
 // Replace the locale segment in the current pathname
 // e.g. /ar/login → /en/login
-</file>
-
-<file path="lib/mail.ts">
-import nodemailer from "nodemailer";
 ⋮----
-// ── i18n ──
-⋮----
-type Locale = keyof typeof t;
-⋮----
-function resolveLocale(locale: string): Locale
-⋮----
-// ── Shell ──
-⋮----
-function emailShell(content: string, locale: string): string
-⋮----
-// ── Verification Email ──
-⋮----
-interface SendVerificationEmailParams {
-  to: string;
-  code: string;
-  restaurantName: string;
-  locale: string;
-}
-⋮----
-export async function sendVerificationEmail({
-  to,
-  code,
-  restaurantName,
-  locale,
-}: SendVerificationEmailParams)
-⋮----
-// ── Password Reset Email ──
-⋮----
-interface SendPasswordResetEmailParams {
-  to: string;
-  name: string;
-  resetLink: string;
-  locale: string;
-}
-⋮----
-export async function sendPasswordResetEmail({
-  to,
-  name,
-  resetLink,
-  locale,
-}: SendPasswordResetEmailParams)
+// Use window.location.href to ensure the browser completely reloads the DOM and dir properties
 </file>
 
 <file path="lib/query-client.ts">
@@ -1410,6 +1625,102 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 }
 </file>
 
+<file path="app/[locale]/(auth)/forgot-password/hooks/use-forgot-password-form.ts">
+import { useState, useTransition } from "react";
+import { useTranslations } from "next-intl";
+import { requestPasswordReset } from "../actions";
+⋮----
+interface ForgotPasswordFormState {
+  error: string | null;
+  successMessage: string | null;
+  isPending: boolean;
+}
+⋮----
+export function useForgotPasswordForm(locale: string)
+⋮----
+const resolveMessage = (key: string): string =>
+⋮----
+const handleRequest = (data: Record<string, string>) =>
+⋮----
+// Stay on this page — no redirect. Just show the confirmation banner.
+</file>
+
+<file path="app/[locale]/(auth)/forgot-password/actions.ts">
+import { db } from "@/lib/db";
+import crypto from "crypto";
+import { generateSecureToken } from "@/lib/utils";
+import { forgotPasswordSchema } from "./_utils/validation";
+import { sendPasswordResetEmail } from "@/lib/mail";
+⋮----
+export type ActionResult =
+  | { success: true; message: string }
+  | { success: false; message: string };
+⋮----
+export async function requestPasswordReset(
+  formData: FormData,
+  locale: string,
+): Promise<ActionResult>
+</file>
+
+<file path="app/[locale]/(auth)/register/hooks/use-register-form.ts">
+import { useState, useTransition, useRef } from "react";
+import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { initiateRegistration, confirmRegistration } from "../actions";
+⋮----
+export type RegisterStep = "INFO" | "OTP";
+⋮----
+interface RegisterFormState {
+  step: RegisterStep;
+  email: string;
+  error: string | null;
+  successMessage: string | null;
+  isPending: boolean;
+}
+⋮----
+export function useRegisterForm(locale: string)
+⋮----
+// Hold the original FormData across steps for re-validation in stage 2
+⋮----
+const resolveMessage = (key: string): string =>
+⋮----
+/**
+   * Phase 1 — Validate info, send OTP, advance to OTP step.
+   */
+const handleInitiate = (data: Record<string, string>) =>
+⋮----
+/**
+   * Phase 2 — Verify OTP, create account, redirect to waiting room.
+   */
+const handleVerify = (otpCode: string) =>
+⋮----
+const goBack = () =>
+</file>
+
+<file path="app/[locale]/(auth)/register/actions.ts">
+import { db } from "@/lib/db";
+import crypto from "crypto";
+import bcrypt from "bcrypt";
+import { slugify, generateVerificationCode } from "@/lib/utils";
+import { registrationInfoSchema, otpSchema } from "./_utils/validation";
+import { sendVerificationEmail } from "@/lib/mail";
+⋮----
+export type ActionResult =
+  | { success: true; message: string }
+  | { success: false; message: string };
+⋮----
+export async function initiateRegistration(
+  formData: FormData,
+  locale: string,
+): Promise<ActionResult>
+⋮----
+export async function confirmRegistration(
+  email: string,
+  otpCode: string,
+  rawFormData: FormData,
+): Promise<ActionResult>
+</file>
+
 <file path="app/[locale]/dashboard/admin/tenants/page.tsx">
 import { auth } from "@/auth/index";
 import { redirect } from "next/navigation";
@@ -1427,6 +1738,7 @@ import { auth } from "@/auth/index";
 import { redirect } from "next/navigation";
 import { dashboardNavItems } from "@/config/dashboard-nav";
 import { DashboardSidebar } from "@/components/layout/dashboard-sidebar";
+import { DashboardHeader } from "@/components/layout/dashboard-header";
 ⋮----
 export default async function DashboardLayout({
   children,
@@ -1434,15 +1746,12 @@ export default async function DashboardLayout({
   children: React.ReactNode;
 })
 ⋮----
-// Failsafe redirect if the middleware somehow allows an unauthenticated request
-⋮----
-// Filter the navigation matrix based on the user's secure role
-⋮----
-{/* Inject the filtered navigation tree into the client component.
-        A Kitchen Staff member will literally never receive the code or links for the Owner settings.
-      */}
-⋮----
-{/* Main Content Workspace */}
+/*
+     * FIX: removed the hardcoded dir="rtl" that was overriding the
+     * dir set on <html> by the root locale layout. Direction is now
+     * inherited from <html dir="rtl|ltr"> which is set correctly per
+     * locale in app/[locale]/layout.tsx.
+     */
 </file>
 
 <file path="app/[locale]/dashboard/page.tsx">
@@ -1471,28 +1780,50 @@ import { PrismaPg } from "@prisma/adapter-pg";
 const prismaClientSingleton = () =>
 </file>
 
-<file path="lib/utils.ts">
-import { clsx, type ClassValue } from "clsx";
-import { twMerge } from "tailwind-merge";
-import crypto from "crypto";
+<file path="lib/mail.ts">
+import nodemailer from "nodemailer";
 ⋮----
-export function cn(...inputs: ClassValue[])
+// ── i18n ──
 ⋮----
-/**
- * Generates a secure, 6-digit numeric string for 2FA verification.
- */
-export function generateVerificationCode(): string
+type Locale = keyof typeof t;
 ⋮----
-/**
- * Generates a cryptographically secure, URL-safe hex token for
- * single-use links (e.g. password reset). 32 bytes -> 64 hex chars.
- */
-export function generateSecureToken(): string
+function resolveLocale(locale: string): Locale
 ⋮----
-/**
- * Converts a raw text string (like a restaurant name) into a URL-friendly slug.
- */
-export function slugify(text: string): string
+// ── Shell ──
+⋮----
+function emailShell(content: string, locale: string): string
+⋮----
+// ── Verification Email ──
+⋮----
+interface SendVerificationEmailParams {
+  to: string;
+  code: string;
+  restaurantName: string;
+  locale: string;
+}
+⋮----
+export async function sendVerificationEmail({
+  to,
+  code,
+  restaurantName,
+  locale,
+}: SendVerificationEmailParams)
+⋮----
+// ── Password Reset Email ──
+⋮----
+interface SendPasswordResetEmailParams {
+  to: string;
+  name: string;
+  resetLink: string;
+  locale: string;
+}
+⋮----
+export async function sendPasswordResetEmail({
+  to,
+  name,
+  resetLink,
+  locale,
+}: SendPasswordResetEmailParams)
 </file>
 
 <file path="types/next-auth.d.ts">
@@ -1593,6 +1924,7 @@ import { defineConfig } from "prisma/config";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
 import { Inter, IBM_Plex_Sans_Arabic } from "next/font/google";
+import { Providers } from "@/app/providers";
 ⋮----
 // Load fonts for both languages
 ⋮----
@@ -1626,6 +1958,34 @@ export interface NavItem {
   iconKey: NavIconKey;
   roles: UserRole[];
 }
+⋮----
+// ── SUPER ADMIN ──
+⋮----
+iconKey: "Shield", // FIX: was "Users", should be "Shield" for the admin section
+</file>
+
+<file path="lib/utils.ts">
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
+import crypto from "crypto";
+⋮----
+export function cn(...inputs: ClassValue[])
+⋮----
+/**
+ * Generates a secure, 6-digit numeric string for 2FA verification.
+ */
+export function generateVerificationCode(): string
+⋮----
+/**
+ * Generates a cryptographically secure, URL-safe hex token for
+ * single-use links (e.g. password reset). 32 bytes -> 64 hex chars.
+ */
+export function generateSecureToken(): string
+⋮----
+/**
+ * Converts a raw text string (like a restaurant name) into a URL-friendly slug.
+ */
+export function slugify(text: string): string
 </file>
 
 <file path="tailwind.config.ts">
@@ -1649,7 +2009,7 @@ import type { Config } from "tailwindcss";
 ⋮----
 /* Fonts */
 ⋮----
-/* Gold */
+/* Brand (primary green accent) */
 ⋮----
 /* Surfaces */
 ⋮----
@@ -1764,6 +2124,7 @@ import { Menu, X, LogOut } from "lucide-react";
 import { navIconMap, type NavItem } from "@/config/dashboard-nav";
 import { signOut } from "next-auth/react";
 import { useTranslations } from "next-intl";
+import { useLocale } from "next-intl";
 ⋮----
 interface SidebarProps {
   items: NavItem[];
@@ -1774,25 +2135,43 @@ interface SidebarProps {
   };
 }
 ⋮----
-{/* Mobile Header */}
+// Strip locale prefix for active matching
 ⋮----
-{/* Sidebar */}
+{/* Mobile top bar */}
 ⋮----
-{/* Desktop Logo */}
+{/* Sidebar panel
+       *
+       * FIX: mobile slide animation was using translate-x-full (physical right)
+       * which is wrong in LTR — sidebar should slide in from the left.
+       * Now uses logical inset-inline-start (start-0) and the translate
+       * is driven by a data attribute so we can target it with a CSS var.
+       *
+       * Approach: use translate-x-full to hide (off-screen to the right in RTL,
+       * to the left in LTR) — but since the sidebar is on the START side in both
+       * locales we need to push it off the START edge when closed:
+       *   RTL → sidebar is on the right → hide with -translate-x-full (move left, off screen)
+       *   LTR → sidebar is on the left  → hide with -translate-x-full (move left, off screen)
+       * So -translate-x-full is actually correct for LTR but WRONG for RTL (should be +translate-x-full).
+       * The cleanest solution: use `translate-x-full` when RTL (push to the right = off the right edge)
+       * and `-translate-x-full` when LTR (push to the left = off the left edge).
+       */}
 ⋮----
-{/* Nav Links */}
+? "translate-x-full" // RTL closed: slide off to the right
+: "-translate-x-full" // LTR closed: slide off to the left
 ⋮----
-const Icon = navIconMap[item.iconKey]; // <-- resolve here
+{/* Logo + role */}
+⋮----
+{/* Nav links */}
+⋮----
+{/* FIX: section label was hardcoded Arabic */}
 ⋮----
 onClick=
 ⋮----
-{/* User Footer */}
-⋮----
-{/* User Info */}
-⋮----
 {/* Logout */}
 ⋮----
-{/* Mobile Overlay */}
+{/* FIX: hardcoded Arabic → i18n */}
+⋮----
+{/* Mobile overlay */}
 </file>
 
 <file path="prisma/schema.prisma">
@@ -1842,8 +2221,9 @@ model Tenant {
   slug      String       @unique
   logo      String?
   currency  String       @default("AED")
-  createdAt DateTime     @default(now()) @map("created_at")
-  updatedAt DateTime     @updatedAt @map("updated_at")
+  createdAt  DateTime     @default(now()) @map("created_at")
+  updatedAt  DateTime     @updatedAt @map("updated_at")
+  approvedAt DateTime?    @map("approved_at")
 
   users            User[]
   branches         Branch[]
@@ -2095,6 +2475,8 @@ next-env.d.ts
 /app/generated/prisma
 
 repomix-output.xml
+
+credentials.txt
 </file>
 
 <file path="middleware.ts">
@@ -2260,7 +2642,7 @@ import type { NextAuthRequest } from "next-auth";
     "chart_placeholder": "سيتم عرض وحدة التحليلات هنا"
   },
   "Nav": {
-    "Admin": "لوحة الإدارة",
+    "OwnerAccounts": "حسابات الملاك",
     "Overview": "لوحة التحكم",
     "POS": "نقطة البيع",
     "Kitchen": "شاشة المطبخ",
@@ -2268,7 +2650,39 @@ import type { NextAuthRequest } from "next-auth";
     "Menu": "إدارة القائمة",
     "Staff": "إدارة الموظفين",
     "Settings": "الإعدادات",
-    "Logout": "تسجيل الخروج"
+    "Logout": "تسجيل الخروج",
+    "SuperAdmin": "المشرف العام"
+  },
+  "OwnerAccounts": {
+    "title": "حسابات الملاك",
+    "description": "إدارة ومتابعة جميع حسابات ملاك المطاعم على المنصة.",
+    "all": "الكل",
+    "pending": "قيد المراجعة",
+    "active": "نشط",
+    "suspended": "موقوف",
+    "search": "بحث بالاسم، البريد الإلكتروني، أو المطعم...",
+    "newest_first": "الأحدث أولاً",
+    "oldest_first": "الأقدم أولاً",
+    "columns": {
+      "restaurant": "المطعم",
+      "owner": "المالك",
+      "email": "البريد الإلكتروني",
+      "status": "الحالة",
+      "submitted_at": "تاريخ التقديم",
+      "approved_at": "تاريخ الموافقة",
+      "actions": "إجراءات"
+    },
+    "empty": "لا توجد حسابات مطابقة للبحث أو الفلتر الحالي.",
+    "error": "حدث خطأ أثناء تحميل البيانات",
+    "retry": "إعادة المحاولة",
+    "activate_account": "تفعيل الحساب",
+    "suspend_account": "إيقاف الحساب",
+    "hard_delete": "حذف نهائي",
+    "confirm_delete_title": "تأكيد الحذف",
+    "confirm_delete_desc": "هل أنت متأكد من حذف حساب \"{name}\" نهائياً؟ هذا الإجراء لا يمكن التراجع عنه وسيحذف جميع بيانات المطعم.",
+    "cancel": "إلغاء",
+    "yes_delete": "نعم، احذف الحساب",
+    "pagination": "عرض {min} إلى {max} من أصل {total}"
   }
 }
 </file>
@@ -2358,7 +2772,7 @@ import type { NextAuthRequest } from "next-auth";
     "chart_placeholder": "Analytics module will render here"
   },
   "Nav": {
-    "Admin": "Admin Panel",
+    "OwnerAccounts": "Owner Accounts",
     "Overview": "Overview",
     "POS": "POS / Checkout",
     "Kitchen": "Kitchen KDS",
@@ -2366,7 +2780,39 @@ import type { NextAuthRequest } from "next-auth";
     "Menu": "Menu Management",
     "Staff": "Staff Control",
     "Settings": "Settings",
-    "Logout": "Logout"
+    "Logout": "Logout",
+    "SuperAdmin": "Super Admin"
+  },
+  "OwnerAccounts": {
+    "title": "Owner Accounts",
+    "description": "Manage and monitor all restaurant owner accounts on the platform.",
+    "all": "All",
+    "pending": "Pending",
+    "active": "Active",
+    "suspended": "Suspended",
+    "search": "Search by name, email, or restaurant...",
+    "newest_first": "Newest First",
+    "oldest_first": "Oldest First",
+    "columns": {
+      "restaurant": "Restaurant",
+      "owner": "Owner",
+      "email": "Email",
+      "status": "Status",
+      "submitted_at": "Submission Date",
+      "approved_at": "Approval Date",
+      "actions": "Actions"
+    },
+    "empty": "No accounts match the current search or filters.",
+    "error": "An error occurred while loading data",
+    "retry": "Retry",
+    "activate_account": "Activate Account",
+    "suspend_account": "Suspend Account",
+    "hard_delete": "Delete Permanently",
+    "confirm_delete_title": "Confirm Deletion",
+    "confirm_delete_desc": "Are you sure you want to permanently delete \"{name}\"? This action cannot be undone and will delete all restaurant data.",
+    "cancel": "Cancel",
+    "yes_delete": "Yes, Delete Account",
+    "pagination": "Showing {min} to {max} out of {total}"
   }
 }
 </file>

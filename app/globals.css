@@ -7,57 +7,57 @@
   --font-arabic: 'IBM Plex Sans Arabic', sans-serif;
   --font-inter: 'Inter', sans-serif;
 
-  /* Gold */
-  --color-gold: #C9922A;
-  --color-gold-light: #E8B84B;
-  --color-gold-dim: #8A6118;
+  /* Brand (primary green accent) */
+  --color-brand: #2E7D32;
+  --color-brand-light: #4CAF50;
+  --color-brand-dim: #1B5E20;
 
   /* Surfaces */
-  --color-surface-0: #0D0D0D;
-  --color-surface-1: #161616;
-  --color-surface-2: #1E1E1E;
-  --color-surface-3: #272727;
-  --color-surface-4: #323232;
+  --color-surface-0: #F4F6F8;
+  --color-surface-1: #FFFFFF;
+  --color-surface-2: #F1F3F5;
+  --color-surface-3: #E9ECEF;
+  --color-surface-4: #DEE2E6;
 
   /* Text */
-  --color-txt-primary: #F5F0E8;
-  --color-txt-secondary: #A89880;
-  --color-txt-muted: #5A5040;
+  --color-txt-primary: #1C1E21;
+  --color-txt-secondary: #5A6472;
+  --color-txt-muted: #9CA3AF;
 
   /* Status */
   --color-status-success: #2E9E6B;
-  --color-status-success-bg: rgba(46,158,107,0.12);
+  --color-status-success-bg: rgba(46,158,107,0.10);
   --color-status-danger: #D45C3C;
-  --color-status-danger-bg: rgba(212,92,60,0.12);
+  --color-status-danger-bg: rgba(212,92,60,0.10);
   --color-status-warning: #D4943C;
-  --color-status-warning-bg: rgba(212,148,60,0.12);
+  --color-status-warning-bg: rgba(212,148,60,0.10);
   --color-status-info: #3C82C4;
-  --color-status-info-bg: rgba(60,130,196,0.12);
+  --color-status-info-bg: rgba(60,130,196,0.10);
 
   /* Border */
-  --color-border: rgba(201,146,42,0.18);
-  --color-border-subtle: rgba(201,146,42,0.18);
-  --color-border-strong: rgba(201,146,42,0.35);
+  --color-border: #E5E7EB;
+  --color-border-subtle: #F3F4F6;
+  --color-border-strong: #D1D5DB;
 
   /* Shadcn-mapped */
-  --color-background: #0D0D0D;
-  --color-foreground: #F5F0E8;
-  --color-input: rgba(201,146,42,0.18);
-  --color-ring: #C9922A;
-  --color-primary: #C9922A;
-  --color-primary-foreground: #0D0D0D;
-  --color-secondary: #1E1E1E;
-  --color-secondary-foreground: #A89880;
+  --color-background: #F4F6F8;
+  --color-foreground: #1C1E21;
+  --color-input: #E5E7EB;
+  --color-ring: #2E7D32;
+  --color-primary: #2E7D32;
+  --color-primary-foreground: #FFFFFF;
+  --color-secondary: #F1F3F5;
+  --color-secondary-foreground: #5A6472;
   --color-destructive: #D45C3C;
-  --color-destructive-foreground: #F5F0E8;
-  --color-muted: #161616;
-  --color-muted-foreground: #5A5040;
-  --color-accent: #272727;
-  --color-accent-foreground: #F5F0E8;
-  --color-popover: #161616;
-  --color-popover-foreground: #F5F0E8;
-  --color-card: #161616;
-  --color-card-foreground: #F5F0E8;
+  --color-destructive-foreground: #FFFFFF;
+  --color-muted: #F1F3F5;
+  --color-muted-foreground: #9CA3AF;
+  --color-accent: #E9ECEF;
+  --color-accent-foreground: #1C1E21;
+  --color-popover: #FFFFFF;
+  --color-popover-foreground: #1C1E21;
+  --color-card: #FFFFFF;
+  --color-card-foreground: #1C1E21;
 
   /* Border radius */
   --radius-sm: 6px;

@@ -44,8 +44,9 @@ model Tenant {
   slug      String       @unique
   logo      String?
   currency  String       @default("AED")
-  createdAt DateTime     @default(now()) @map("created_at")
-  updatedAt DateTime     @updatedAt @map("updated_at")
+  createdAt  DateTime     @default(now()) @map("created_at")
+  updatedAt  DateTime     @updatedAt @map("updated_at")
+  approvedAt DateTime?    @map("approved_at")
 
   users            User[]
   branches         Branch[]

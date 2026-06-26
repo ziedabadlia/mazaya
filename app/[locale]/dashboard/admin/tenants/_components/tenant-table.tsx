@@ -15,7 +15,7 @@ interface TenantTableProps {
 
 const statusStyles: Record<string, string> = {
   ACTIVE: "border-status-success/20 bg-status-success-bg text-status-success",
-  PENDING: "border-gold/20 bg-gold/10 text-gold",
+  PENDING: "border-brand/20 bg-brand/10 text-brand",
   SUSPENDED: "border-status-danger/20 bg-status-danger-bg text-status-danger",
 };
 

@@ -82,7 +82,7 @@
     "chart_placeholder": "Analytics module will render here"
   },
   "Nav": {
-    "Admin": "Admin Panel",
+    "OwnerAccounts": "Owner Accounts",
     "Overview": "Overview",
     "POS": "POS / Checkout",
     "Kitchen": "Kitchen KDS",
@@ -90,6 +90,44 @@
     "Menu": "Menu Management",
     "Staff": "Staff Control",
     "Settings": "Settings",
-    "Logout": "Logout"
+    "Logout": "Logout",
+    "SuperAdmin": "Super Admin"
+  },
+  "OwnerAccounts": {
+    "title": "Owner Accounts",
+    "description": "Manage and monitor all restaurant owner accounts on the platform.",
+    "all": "All",
+    "pending": "Pending",
+    "active": "Active",
+    "suspended": "Suspended",
+    "search": "Search by name, email, or restaurant...",
+    "newest_first": "Newest First",
+    "oldest_first": "Oldest First",
+    "date_type_submission": "Submission Date",
+    "date_type_approval": "Approval Date",
+    "date_placeholder": "Select date range",
+    "date_clear": "Clear",
+    "date_hint_start": "Click to set start date",
+    "date_hint_end": "Click to set end date",
+    "columns": {
+      "restaurant": "Restaurant",
+      "owner": "Owner",
+      "email": "Email",
+      "status": "Status",
+      "submitted_at": "Submission Date",
+      "approved_at": "Approval Date",
+      "actions": "Actions"
+    },
+    "empty": "No accounts match the current search or filters.",
+    "error": "An error occurred while loading data",
+    "retry": "Retry",
+    "activate_account": "Activate Account",
+    "suspend_account": "Suspend Account",
+    "hard_delete": "Delete Permanently",
+    "confirm_delete_title": "Confirm Deletion",
+    "confirm_delete_desc": "Are you sure you want to permanently delete \"{name}\"? This action cannot be undone and will delete all restaurant data.",
+    "cancel": "Cancel",
+    "yes_delete": "Yes, Delete Account",
+    "pagination": "Showing {min} to {max} out of {total}"
   }
 }

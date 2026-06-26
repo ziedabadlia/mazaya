@@ -50,9 +50,7 @@ export default async function DashboardIndexPage() {
       {/* Header */}
       <div className='flex flex-col gap-1'>
         <h1 className='text-2xl font-bold text-txt-primary'>
-          <h1 className='text-2xl font-bold text-txt-primary'>
-            {t("welcome", { name: name ?? "" })}
-          </h1>
+          {t("welcome", { name: name ?? "" })}
         </h1>
         <p className='text-sm text-txt-secondary'>
           {role === "OWNER" ? t("overview_owner") : t("overview_branch")}
@@ -64,13 +62,13 @@ export default async function DashboardIndexPage() {
         {stats.map((stat) => (
           <div
             key={stat.label}
-            className='rounded-xl border border-border bg-surface-1 p-5 space-y-4 transition-colors hover:border-gold/20 hover:bg-surface-1'
+            className='rounded-xl border border-border bg-surface-1 p-5 space-y-4 transition-colors hover:border-brand/20 hover:bg-surface-1'
           >
             <div className='flex items-center justify-between'>
               <span className='text-xs font-medium text-txt-muted'>
                 {stat.label}
               </span>
-              <div className='flex h-8 w-8 items-center justify-center rounded-lg bg-gold/10 text-gold'>
+              <div className='flex h-8 w-8 items-center justify-center rounded-lg bg-brand/10 text-brand'>
                 <stat.icon className='h-4 w-4' />
               </div>
             </div>
@@ -94,7 +92,7 @@ export default async function DashboardIndexPage() {
           <h2 className='text-sm font-semibold text-txt-primary'>
             {t("chart_title")}
           </h2>
-          <span className='rounded-full border border-gold/20 bg-gold/10 px-2.5 py-1 text-xs font-medium text-gold'>
+          <span className='rounded-full border border-brand/20 bg-brand/10 px-2.5 py-1 text-xs font-medium text-brand'>
             {t("chart_badge")}
           </span>
         </div>

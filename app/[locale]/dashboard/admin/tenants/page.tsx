@@ -42,7 +42,7 @@ export default async function TenantsPage() {
           {
             label: "قيد المراجعة",
             count: pending.length,
-            style: "border-gold/20 bg-gold/10 text-gold",
+            style: "border-brand/20 bg-brand/10 text-brand",
           },
           {
             label: "نشط",
