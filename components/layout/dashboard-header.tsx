@@ -2,7 +2,6 @@
 
 import { usePathname } from "next/navigation";
 import { LanguageSwitcher } from "@/components/ui/language-switcher";
-import { Bell } from "lucide-react";
 import { dashboardNavItems } from "@/config/dashboard-nav";
 import { useTranslations } from "next-intl";
 
@@ -44,10 +43,6 @@ export function DashboardHeader() {
 
       <div className='flex items-center gap-4'>
         <LanguageSwitcher />
-        <button className='relative text-txt-secondary hover:text-brand transition-colors p-1'>
-          <Bell className='h-[20px] w-[20px]' />
-          <span className='absolute top-0 right-0 block h-2 w-2 rounded-full ring-2 ring-surface-1 bg-status-info' />
-        </button>
       </div>
     </header>
   );

@@ -77,7 +77,7 @@ export const dashboardNavItems: NavItem[] = [
   {
     translationKey: "OwnerAccounts",
     href: "/dashboard/admin/owner-accounts",
-    iconKey: "Shield", // FIX: was "Users", should be "Shield" for the admin section
+    iconKey: "Users",
     roles: ["SUPER_ADMIN"],
   },
 ];

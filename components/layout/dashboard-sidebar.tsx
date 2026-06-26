@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X, LogOut } from "lucide-react";
+import { Menu, X, LogOut, MoveRight } from "lucide-react";
 import { navIconMap, type NavItem } from "@/config/dashboard-nav";
 import { signOut } from "next-auth/react";
 import { useTranslations } from "next-intl";
@@ -73,21 +73,20 @@ export function DashboardSidebar({ items, user }: SidebarProps) {
         `}
       >
         {/* Logo + role */}
-        <div className='flex items-center gap-3 px-6 py-6'>
+        <div className='flex items-center gap-3 px-5 py-5'>
           <img
             src='/logo.svg'
             alt='Mazaya'
-            className='h-8 w-8 object-contain'
+            className='h-9 w-9 object-contain'
           />
-          <span className='text-sm font-semibold text-txt-secondary'>
+          <span className='text-sm font-semibold text-txt-primary'>
             {user.role === "SUPER_ADMIN" ? t("SuperAdmin") : user.name}
           </span>
         </div>
 
         {/* Nav links */}
-        <nav className='flex-1 space-y-1 overflow-y-auto px-4 py-2'>
-          {/* FIX: section label was hardcoded Arabic */}
-          <div className='px-2 pb-2 text-xs font-medium text-txt-muted'>
+        <nav className='flex-1 space-y-0.5 overflow-y-auto px-3 py-2'>
+          <div className='px-2 pb-2 pt-1 text-xs font-medium text-txt-muted'>
             {t("Overview")}
           </div>
           {items.map((item) => {
@@ -103,12 +102,11 @@ export function DashboardSidebar({ items, user }: SidebarProps) {
                 onClick={() => setIsOpen(false)}
                 className={`
                   flex items-center gap-3 px-3 py-2.5 text-sm font-medium
-                  transition-all rounded-lg
-                  border-s-4
+                  transition-all rounded-xl
                   ${
                     isActive
-                      ? "bg-brand/10 text-brand border-brand font-semibold"
-                      : "text-txt-secondary hover:bg-surface-2 hover:text-txt-primary border-transparent"
+                      ? "bg-brand/10 text-brand font-semibold"
+                      : "text-txt-secondary hover:bg-surface-2/60 hover:text-txt-primary"
                   }
                 `}
               >
@@ -122,13 +120,13 @@ export function DashboardSidebar({ items, user }: SidebarProps) {
         </nav>
 
         {/* Logout */}
-        <div className='p-4'>
+        <div className='px-3 pb-5 pt-2 border-t border-border'>
           <button
             onClick={() => signOut({ callbackUrl: `/${locale}/login` })}
-            className='flex w-full items-center gap-3 px-3 py-2.5 text-sm font-medium text-status-danger transition-all hover:bg-status-danger-bg rounded-lg'
+            className='flex w-full items-center gap-3 px-3 py-2.5 text-sm font-semibold rounded-xl transition-colors hover:bg-red-50'
+            style={{ color: "#C1440E" }}
           >
             <LogOut className='h-[18px] w-[18px] shrink-0' />
-            {/* FIX: hardcoded Arabic → i18n */}
             <span>{t("Logout")}</span>
           </button>
         </div>
