@@ -30,7 +30,7 @@ export function Pagination({ page, total, limit, onChange }: PaginationProps) {
           <button
             key={i}
             onClick={() => onChange(i)}
-            className={`h-9 w-9 rounded-lg text-sm font-medium transition-colors flex items-center justify-center ${
+            className={`h-8 w-8 sm:h-9 sm:w-9 rounded-lg text-sm font-medium transition-colors flex items-center justify-center ${
               page === i
                 ? "bg-[#009966] text-white"
                 : "text-txt-secondary hover:bg-surface-2 hover:text-txt-primary"
@@ -41,7 +41,7 @@ export function Pagination({ page, total, limit, onChange }: PaginationProps) {
         );
       } else if (i === page - 2 || i === page + 2) {
         pages.push(
-          <span key={i} className='px-1 text-txt-muted'>
+          <span key={i} className='px-0.5 sm:px-1 text-txt-muted'>
             ...
           </span>,
         );
@@ -58,29 +58,29 @@ export function Pagination({ page, total, limit, onChange }: PaginationProps) {
       <p className='text-sm text-txt-muted text-center sm:text-start'>
         {t("pagination", { min, max, total })}
       </p>
-      <div className='flex items-center gap-2'>
+      <div className='flex items-center justify-center gap-1.5 sm:gap-2'>
         {/* Previous */}
         <button
           onClick={() => onChange(Math.max(1, page - 1))}
           disabled={page === 1}
-          className='flex items-center gap-2 px-4 py-2 rounded-full border border-border bg-white text-sm font-medium text-txt-secondary transition-all hover:bg-surface-2 hover:text-txt-primary disabled:opacity-50 disabled:pointer-events-none'
+          className='flex items-center gap-1.5 px-2.5 py-1.5 sm:px-4 sm:py-2 rounded-full border border-border bg-white text-xs sm:text-sm font-medium text-txt-secondary transition-all hover:bg-surface-2 hover:text-txt-primary disabled:opacity-50 disabled:pointer-events-none'
         >
-          {!isRtl && <PrevIcon className='h-4 w-4' />}
+          {!isRtl && <PrevIcon className='h-3.5 w-3.5 sm:h-4 sm:w-4' />}
           <span>{t("previous")}</span>
-          {isRtl && <PrevIcon className='h-4 w-4' />}
+          {isRtl && <PrevIcon className='h-3.5 w-3.5 sm:h-4 sm:w-4' />}
         </button>
 
-        <div className='flex items-center gap-1 mx-1'>{renderPages()}</div>
+        <div className='flex items-center gap-1 mx-0.5 sm:mx-1'>{renderPages()}</div>
 
         {/* Next */}
         <button
           onClick={() => onChange(Math.min(totalPages, page + 1))}
           disabled={page === totalPages}
-          className='flex items-center gap-2 px-4 py-2 rounded-full border border-border bg-white text-sm font-medium text-txt-secondary transition-all hover:bg-surface-2 hover:text-txt-primary disabled:opacity-50 disabled:pointer-events-none'
+          className='flex items-center gap-1.5 px-2.5 py-1.5 sm:px-4 sm:py-2 rounded-full border border-border bg-white text-xs sm:text-sm font-medium text-txt-secondary transition-all hover:bg-surface-2 hover:text-txt-primary disabled:opacity-50 disabled:pointer-events-none'
         >
-          {isRtl && <NextIcon className='h-4 w-4' />}
+          {isRtl && <NextIcon className='h-3.5 w-3.5 sm:h-4 sm:w-4' />}
           <span>{t("next")}</span>
-          {!isRtl && <NextIcon className='h-4 w-4' />}
+          {!isRtl && <NextIcon className='h-3.5 w-3.5 sm:h-4 sm:w-4' />}
         </button>
       </div>
     </div>
