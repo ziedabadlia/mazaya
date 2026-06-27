@@ -30,9 +30,9 @@ export function Pagination({ page, total, limit, onChange }: PaginationProps) {
           <button
             key={i}
             onClick={() => onChange(i)}
-            className={`h-8 w-8 rounded-md text-sm font-medium transition-colors flex items-center justify-center ${
+            className={`h-9 w-9 rounded-lg text-sm font-medium transition-colors flex items-center justify-center ${
               page === i
-                ? "bg-brand text-white"
+                ? "bg-[#009966] text-white"
                 : "text-txt-secondary hover:bg-surface-2 hover:text-txt-primary"
             }`}
           >
@@ -50,42 +50,37 @@ export function Pagination({ page, total, limit, onChange }: PaginationProps) {
     return pages;
   };
 
-  /*
-   * FIX: chevron directions were hardcoded for RTL only.
-   * In RTL:  ChevronRight = "previous", ChevronLeft = "next"  (reading flows right-to-left)
-   * In LTR:  ChevronLeft  = "previous", ChevronRight = "next" (reading flows left-to-right)
-   *
-   * Also fixed: pagination text was hardcoded Arabic. Now uses i18n.
-   */
   const PrevIcon = isRtl ? ChevronRight : ChevronLeft;
   const NextIcon = isRtl ? ChevronLeft : ChevronRight;
 
   return (
-    <div className='flex items-center justify-between border-t border-border pt-4 mt-6'>
-      <p className='text-sm text-txt-muted'>
+    <div className='flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-t border-border pt-4 mt-6'>
+      <p className='text-sm text-txt-muted text-center sm:text-start'>
         {t("pagination", { min, max, total })}
       </p>
-      <div className='flex items-center gap-1'>
+      <div className='flex items-center gap-2'>
         {/* Previous */}
         <button
           onClick={() => onChange(Math.max(1, page - 1))}
           disabled={page === 1}
-          className='flex h-8 w-8 items-center justify-center rounded-md text-txt-secondary hover:bg-surface-2 hover:text-txt-primary disabled:opacity-50 disabled:pointer-events-none'
-          aria-label='Previous page'
+          className='flex items-center gap-2 px-4 py-2 rounded-full border border-border bg-white text-sm font-medium text-txt-secondary transition-all hover:bg-surface-2 hover:text-txt-primary disabled:opacity-50 disabled:pointer-events-none'
         >
-          <PrevIcon className='h-4 w-4' />
+          {!isRtl && <PrevIcon className='h-4 w-4' />}
+          <span>{t("previous")}</span>
+          {isRtl && <PrevIcon className='h-4 w-4' />}
         </button>
 
-        <div className='flex items-center gap-1 mx-2'>{renderPages()}</div>
+        <div className='flex items-center gap-1 mx-1'>{renderPages()}</div>
 
         {/* Next */}
         <button
           onClick={() => onChange(Math.min(totalPages, page + 1))}
           disabled={page === totalPages}
-          className='flex h-8 w-8 items-center justify-center rounded-md text-txt-secondary hover:bg-surface-2 hover:text-txt-primary disabled:opacity-50 disabled:pointer-events-none'
-          aria-label='Next page'
+          className='flex items-center gap-2 px-4 py-2 rounded-full border border-border bg-white text-sm font-medium text-txt-secondary transition-all hover:bg-surface-2 hover:text-txt-primary disabled:opacity-50 disabled:pointer-events-none'
         >
-          <NextIcon className='h-4 w-4' />
+          {isRtl && <NextIcon className='h-4 w-4' />}
+          <span>{t("next")}</span>
+          {!isRtl && <NextIcon className='h-4 w-4' />}
         </button>
       </div>
     </div>

@@ -128,6 +128,8 @@
     "confirm_delete_desc": "Are you sure you want to permanently delete \"{name}\"? This action cannot be undone and will delete all restaurant data.",
     "cancel": "Cancel",
     "yes_delete": "Yes, Delete Account",
-    "pagination": "Showing {min} to {max} out of {total}"
+    "pagination": "Showing {min} to {max} out of {total}",
+    "previous": "Previous",
+    "next": "Next"
   }
 }
