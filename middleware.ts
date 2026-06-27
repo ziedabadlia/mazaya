@@ -42,6 +42,12 @@ export default auth(function middleware(req: NextAuthRequest) {
 
   const locale = pathname.split("/")[1] || defaultLocale;
 
+  // 1. Guest root redirect (force to English login)
+  const isRoot = pathnameWithoutLocale === "/" || pathnameWithoutLocale === "" || pathname === "/en" || pathname === "/ar";
+  if (!session && isRoot) {
+    return NextResponse.redirect(new URL("/en/login", req.url));
+  }
+
   // 1. Unauthenticated — redirect to login
   if (isProtected && !session) {
     return NextResponse.redirect(new URL(`/${locale}/login`, req.url));
@@ -86,10 +92,6 @@ export default auth(function middleware(req: NextAuthRequest) {
     return NextResponse.redirect(new URL(`/${locale}/dashboard`, req.url));
   }
 
-  // 6. Guest root redirect (force to English login)
-  if (!session && pathnameWithoutLocale === "/") {
-    return NextResponse.redirect(new URL("/en/login", req.url));
-  }
 
   return intlMiddleware(req);
 });

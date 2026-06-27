@@ -142,7 +142,7 @@ export function OwnerAccountsContainer() {
   const counts = countsData ?? emptyCounts;
 
   return (
-    <div className='flex-1 rounded-xl bg-surface-1 p-5 shadow-sm border border-border'>
+    <div className='flex-1 rounded-xl bg-surface-1 p-3 sm:p-5 shadow-sm border border-border'>
       {/* Chips — independent query, never blocked by table loading */}
       <StatusTabs
         currentStatus={status}
