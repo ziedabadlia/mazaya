@@ -54,15 +54,41 @@ export default auth(function middleware(req: NextAuthRequest) {
 
   // 3. Authenticated + ACTIVE — block waiting room access
   if (session && isWaitingRoom && session.user?.tenantStatus === "ACTIVE") {
+    if (session.user?.role === "SUPER_ADMIN") {
+      return NextResponse.redirect(
+        new URL(`/${locale}/dashboard/admin/owner-accounts`, req.url),
+      );
+    }
     return NextResponse.redirect(new URL(`/${locale}/dashboard`, req.url));
   }
 
-  // 4. Already logged in — block auth pages
+  // 4. Root dashboard redirect for Super Admin
+  if (
+    session &&
+    pathnameWithoutLocale === "/dashboard" &&
+    session.user?.role === "SUPER_ADMIN"
+  ) {
+    return NextResponse.redirect(
+      new URL(`/${locale}/dashboard/admin/owner-accounts`, req.url),
+    );
+  }
+
+  // 5. Already logged in — block auth pages
   if (session && isAuthRoute) {
     if (session.user?.tenantStatus === "PENDING") {
       return NextResponse.redirect(new URL(`/${locale}/waiting-room`, req.url));
     }
+    if (session.user?.role === "SUPER_ADMIN") {
+      return NextResponse.redirect(
+        new URL(`/${locale}/dashboard/admin/owner-accounts`, req.url),
+      );
+    }
     return NextResponse.redirect(new URL(`/${locale}/dashboard`, req.url));
+  }
+
+  // 6. Guest root redirect (force to English login)
+  if (!session && pathnameWithoutLocale === "/") {
+    return NextResponse.redirect(new URL("/en/login", req.url));
   }
 
   return intlMiddleware(req);
