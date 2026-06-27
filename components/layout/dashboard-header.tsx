@@ -36,7 +36,7 @@ export function DashboardHeader() {
   }
 
   return (
-    <header className='flex items-center justify-between border-b border-border bg-surface-1 px-4 py-3 md:px-8'>
+    <header className='flex h-16 items-center justify-between border-b border-border bg-surface-1 px-4 md:px-8'>
       <div className='flex items-center'>
         <h1 className='text-lg font-bold text-txt-primary'>{currentTitle}</h1>
       </div>

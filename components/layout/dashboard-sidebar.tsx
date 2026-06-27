@@ -72,14 +72,13 @@ export function DashboardSidebar({ items, user }: SidebarProps) {
           }
         `}
       >
-        {/* Logo + role */}
-        <div className='flex items-center gap-3 px-5 py-5'>
+        <div className='flex h-16 items-center gap-3 px-5 border-b border-border'>
           <img
             src='/logo.svg'
             alt='Mazaya'
             className='h-9 w-9 object-contain'
           />
-          <span className='text-sm font-semibold text-txt-primary'>
+          <span className='text-sm font-semibold text-txt-secondary'>
             {user.role === "SUPER_ADMIN" ? t("SuperAdmin") : user.name}
           </span>
         </div>

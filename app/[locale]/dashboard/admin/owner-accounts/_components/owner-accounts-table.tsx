@@ -189,8 +189,8 @@ export function OwnerAccountsTable({
                         const style = STATUS_STYLE[tenant.status] || { bg: "", text: "", dot: "" };
                         return (
                           <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${style.bg} ${style.text}`}>
-                            <span className={`size-1.5 rounded-full flex-shrink-0 ${style.dot}`} />
                             {statusLabel}
+                            <span className={`size-1.5 rounded-full flex-shrink-0 ${style.dot}`} />
                           </span>
                         );
                       })()}
